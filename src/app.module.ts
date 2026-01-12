@@ -5,6 +5,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { HealthModule } from './health/health.module';
 import { HeroCrasolModule } from './setting/home/hero-crasol/hero-crasol.module';
+import { CaseStudiesModule } from './setting/home/case-studies/case-studies.module';
+import { CategoryModule } from './setting/category/category.module';
+import { PricePackageModule } from './setting/home/price-package/price-package.module';
 
 @Module({
   imports: [
@@ -32,6 +35,9 @@ import { HeroCrasolModule } from './setting/home/hero-crasol/hero-crasol.module'
 
     HeroCrasolModule,
     HealthModule,
+    CaseStudiesModule,
+    CategoryModule,
+    PricePackageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
