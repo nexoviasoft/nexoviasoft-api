@@ -9,31 +9,55 @@ export class HeroCrasolController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createHeroCrasolDto: CreateHeroCrasolDto) {
-    return this.heroCrasolService.create(createHeroCrasolDto);
+  async create(@Body() createHeroCrasolDto: CreateHeroCrasolDto) {
+    const data = await this.heroCrasolService.create(createHeroCrasolDto);
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Hero Crasol created successfully',
+      data,
+    };
   }
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  findAll() {
-    return this.heroCrasolService.findAll();
+  async findAll() {
+    const data = await this.heroCrasolService.findAll();
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Hero Crasols retrieved successfully',
+      data,
+    };
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  findOne(@Param('id') id: string) {
-    return this.heroCrasolService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const data = await this.heroCrasolService.findOne(+id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Hero Crasol retrieved successfully',
+      data,
+    };
   }
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  update(@Param('id') id: string, @Body() updateHeroCrasolDto: UpdateHeroCrasolDto) {
-    return this.heroCrasolService.update(+id, updateHeroCrasolDto);
+  async update(@Param('id') id: string, @Body() updateHeroCrasolDto: UpdateHeroCrasolDto) {
+    const data = await this.heroCrasolService.update(+id, updateHeroCrasolDto);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Hero Crasol updated successfully',
+      data,
+    };
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  remove(@Param('id') id: string) {
-    return this.heroCrasolService.remove(+id);
+  async remove(@Param('id') id: string) {
+    await this.heroCrasolService.remove(+id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Hero Crasol deleted successfully',
+    };
   }
 }

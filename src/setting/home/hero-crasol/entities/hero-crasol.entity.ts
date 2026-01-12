@@ -10,4 +10,6 @@ export class HeroCrasol {
 
     @Column({ default: 'active' })
     status: string;
+
+
 }
