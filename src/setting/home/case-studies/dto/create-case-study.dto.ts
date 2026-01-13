@@ -33,4 +33,33 @@ export class CreateCaseStudyDto {
     @IsString()
     @IsOptional()
     status: string;
+
+    @IsNumber()
+    @IsOptional()
+    clientId: number;
+
+    @IsString()
+    @IsOptional()
+    industry: string;
+
+    @IsString()
+    @IsOptional()
+    problem_statement: string;
+
+    @IsString()
+    @IsOptional()
+    solution_overview: string;
+
+    @IsString()
+    @IsOptional()
+    results: string;
+
+    @IsString()
+    @IsOptional()
+    duration: string;
+
+    @IsArray()
+    @IsString({ each: true })
+    @IsOptional()
+    projectimage: string[];
 }

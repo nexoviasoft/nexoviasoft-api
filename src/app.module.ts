@@ -8,6 +8,13 @@ import { HeroCrasolModule } from './setting/home/hero-crasol/hero-crasol.module'
 import { CaseStudiesModule } from './setting/home/case-studies/case-studies.module';
 import { CategoryModule } from './setting/category/category.module';
 import { PricePackageModule } from './setting/home/price-package/price-package.module';
+import { DepartmentModule } from './setting/department/department.module';
+import { OurTeamModule } from './setting/home/our-team/our-team.module';
+import { OurClientModule } from './setting/our-client/our-client.module';
+import { CustomerReviewModule } from './setting/home/customer-review/customer-review.module';
+import { FooterModule } from './setting/footer/footer.module';
+import { CommonModule } from './common/common.module';
+
 
 @Module({
   imports: [
@@ -15,6 +22,9 @@ import { PricePackageModule } from './setting/home/price-package/price-package.m
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
+    // Common module (CDN upload service)
+    CommonModule,
 
     // Database connection (NeonDB)
     TypeOrmModule.forRootAsync({
@@ -38,6 +48,11 @@ import { PricePackageModule } from './setting/home/price-package/price-package.m
     CaseStudiesModule,
     CategoryModule,
     PricePackageModule,
+    DepartmentModule,
+    OurTeamModule,
+    OurClientModule,
+    CustomerReviewModule,
+    FooterModule,
   ],
   controllers: [AppController],
   providers: [AppService],

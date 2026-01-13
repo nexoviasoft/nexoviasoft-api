@@ -1,26 +1,121 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateOurTeamDto } from './dto/create-our-team.dto';
 import { UpdateOurTeamDto } from './dto/update-our-team.dto';
+import { OurTeam } from './entities/our-team.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class OurTeamService {
-  create(createOurTeamDto: CreateOurTeamDto) {
-    return 'This action adds a new ourTeam';
+  constructor(
+    @InjectRepository(OurTeam)
+    private readonly ourTeamRepository: Repository<OurTeam>,
+  ) {}
+
+  async create(createOurTeamDto: CreateOurTeamDto) {
+    // Hash password before saving
+    const hashedPassword = await bcrypt.hash(createOurTeamDto.password, 10);
+    
+    const { password, hireDate, dateOfBirth, ...rest } = createOurTeamDto;
+    
+    const employee = this.ourTeamRepository.create({
+      ...rest,
+      password: hashedPassword,
+      hireDate: hireDate ? new Date(hireDate) : null,
+      dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+    } as Partial<OurTeam>);
+    
+    return this.ourTeamRepository.save(employee);
   }
 
   findAll() {
-    return `This action returns all ourTeam`;
+    return this.ourTeamRepository.find({
+      relations: ['department'],
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} ourTeam`;
+  async findAllPublic() {
+    const employees = await this.ourTeamRepository.find({
+      where: { status: 'active' },
+      select: ['id', 'firstName', 'lastName', 'profileImage', 'position'],
+    });
+    
+    // Transform to return name, image, and designation
+    return employees.map(employee => ({
+      id: employee.id,
+      name: `${employee.firstName} ${employee.lastName}`,
+      image: employee.profileImage,
+      designation: employee.position,
+    }));
   }
 
-  update(id: number, updateOurTeamDto: UpdateOurTeamDto) {
-    return `This action updates a #${id} ourTeam`;
+  async findOne(id: number) {
+    const employee = await this.ourTeamRepository.findOne({
+      where: { id },
+      relations: ['department'],
+    });
+    
+    if (!employee) {
+      throw new NotFoundException(`Employee with ID ${id} not found`);
+    }
+    
+    return employee;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} ourTeam`;
+  async findByEmail(email: string) {
+    const employee = await this.ourTeamRepository.findOne({
+      where: { email },
+      relations: ['department'],
+    });
+    
+    if (!employee) {
+      throw new NotFoundException(`Employee with email ${email} not found`);
+    }
+    
+    return employee;
+  }
+
+  async update(id: number, updateOurTeamDto: UpdateOurTeamDto) {
+    const employee = await this.findOne(id);
+    
+    // Hash password if it's being updated
+    if (updateOurTeamDto.password) {
+      updateOurTeamDto.password = await bcrypt.hash(updateOurTeamDto.password, 10);
+    }
+    
+    // Convert date strings to Date objects if provided
+    if (updateOurTeamDto.hireDate) {
+      (updateOurTeamDto as any).hireDate = new Date(updateOurTeamDto.hireDate);
+    }
+    if (updateOurTeamDto.dateOfBirth) {
+      (updateOurTeamDto as any).dateOfBirth = new Date(updateOurTeamDto.dateOfBirth);
+    }
+    
+    Object.assign(employee, updateOurTeamDto);
+    return this.ourTeamRepository.save(employee);
+  }
+
+  async remove(id: number) {
+    const employee = await this.findOne(id);
+    return this.ourTeamRepository.remove(employee);
+  }
+
+  async activate(id: number) {
+    const employee = await this.findOne(id);
+    employee.status = 'active';
+    return this.ourTeamRepository.save(employee);
+  }
+
+  async deactivate(id: number) {
+    const employee = await this.findOne(id);
+    employee.status = 'inactive';
+    return this.ourTeamRepository.save(employee);
+  }
+
+  async suspend(id: number) {
+    const employee = await this.findOne(id);
+    employee.status = 'suspended';
+    return this.ourTeamRepository.save(employee);
   }
 }

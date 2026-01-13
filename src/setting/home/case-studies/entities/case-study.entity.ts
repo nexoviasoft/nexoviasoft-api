@@ -1,5 +1,6 @@
-import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Category } from 'src/setting/category/entities/category.entity';
+import { OurClient } from 'src/setting/our-client/entities/our-client.entity';
 
 @Entity()
 export class CaseStudy {
@@ -33,4 +34,29 @@ export class CaseStudy {
 
     @Column({ default: 'active' })
     status: string;
+
+    @ManyToOne(() => OurClient, { nullable: true })
+    @JoinColumn({ name: 'clientId' })
+    client: OurClient;
+
+    @Column({ nullable: true })
+    clientId: number;
+
+    @Column({ nullable: true })
+    industry: string;
+
+    @Column({ type: 'text', nullable: true })
+    problem_statement: string;
+
+    @Column({ type: 'text', nullable: true })
+    solution_overview: string;
+
+    @Column({ type: 'text', nullable: true })
+    results: string;
+
+    @Column({ nullable: true })
+    duration: string;
+
+    @Column('simple-array', { nullable: true })
+    projectimage: string[];
 }

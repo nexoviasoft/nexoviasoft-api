@@ -40,6 +40,17 @@ export class CustomerReviewController {
     };
   }
 
+  @Patch(':id/approve')
+  @HttpCode(HttpStatus.OK)
+  async approve(@Param('id') id: string) {
+    const data = await this.customerReviewService.approve(+id);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Customer Review approved and featured successfully',
+      data,
+    };
+  }
+
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   async update(@Param('id') id: string, @Body() updateCustomerReviewDto: UpdateCustomerReviewDto) {
