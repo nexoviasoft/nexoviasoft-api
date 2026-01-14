@@ -38,6 +38,11 @@ import { CommonModule } from './common/common.module';
         ssl: {
           rejectUnauthorized: false,
         },
+        connectTimeoutMS: 30000, // 30 seconds
+        extra: {
+          connectionTimeoutMillis: 30000,
+          keepAlive: true,
+        },
       }),
     }),
 
