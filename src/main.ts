@@ -1,6 +1,3 @@
-import { setDefaultResultOrder } from 'node:dns';
-setDefaultResultOrder('ipv4first');
-
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -15,12 +12,12 @@ async function bootstrap() {
   });
 
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:5173'],
+    origin: ['http://localhost:3000', 'http://localhost:5173','https://squadlog.up.railway.app'],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
     credentials: true,
   });
 
-  await app.listen(process.env.PORT || 5001);
+  await app.listen(5001);
 }
 bootstrap();
