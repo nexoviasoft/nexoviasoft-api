@@ -14,6 +14,9 @@ import { OurClientModule } from './setting/our-client/our-client.module';
 import { CustomerReviewModule } from './setting/home/customer-review/customer-review.module';
 import { FooterModule } from './setting/footer/footer.module';
 import { CommonModule } from './common/common.module';
+import { ServiceRequestModule } from './setting/service-request/service-request.module';
+import { OurServiceModule } from './setting/our-service/our-service.module';
+import { OurProductModule } from './setting/our-product/our-product.module';
 
 
 @Module({
@@ -58,6 +61,9 @@ import { CommonModule } from './common/common.module';
     OurClientModule,
     CustomerReviewModule,
     FooterModule,
+    ServiceRequestModule,
+    OurServiceModule,
+    OurProductModule,
   ],
   controllers: [AppController],
   providers: [AppService],
