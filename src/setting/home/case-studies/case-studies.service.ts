@@ -54,6 +54,7 @@ export class CaseStudiesService {
       relations: ['categories', 'client'],
       select: {
         categories: {
+          id: true,
           name: true,
         },
         client: {
@@ -74,6 +75,7 @@ export class CaseStudiesService {
       relations: ['categories', 'client'],
       select: {
         categories: {
+          id: true,
           name: true,
         },
         client: {

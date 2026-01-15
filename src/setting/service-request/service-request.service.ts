@@ -4,18 +4,13 @@ import { Repository } from 'typeorm';
 import { CreateServiceRequestDto } from './dto/create-service-request.dto';
 import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
 import { ServiceRequest } from './entities/service-request.entity';
-import { OurClient } from '../our-client/entities/our-client.entity';
-import { PricePackage } from '../home/price-package/entities/price-package.entity';
 
 @Injectable()
 export class ServiceRequestService {
   constructor(
     @InjectRepository(ServiceRequest)
     private readonly serviceRequestRepository: Repository<ServiceRequest>,
-    @InjectRepository(OurClient)
-    private readonly ourClientRepository: Repository<OurClient>,
-    @InjectRepository(PricePackage)
-    private readonly pricePackageRepository: Repository<PricePackage>,
+    
   ) {}
 
   async create(createServiceRequestDto: CreateServiceRequestDto) {
