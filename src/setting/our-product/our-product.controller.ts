@@ -2,7 +2,6 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post
 import { OurProductService } from './our-product.service';
 import { CreateOurProductDto } from './dto/create-our-product.dto';
 import { UpdateOurProductDto } from './dto/update-our-product.dto';
-import { UploadMultipleFields } from 'src/common/decorators/file-upload.decorator';
 
 @Controller('our-product')
 export class OurProductController {
@@ -10,9 +9,6 @@ export class OurProductController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @UploadMultipleFields([
-    { name: 'logo', maxCount: 1 },
-  ])
   async create(@Body() createOurProductDto: CreateOurProductDto) {
     const data = await this.ourProductService.create(createOurProductDto);
     return {
@@ -46,9 +42,6 @@ export class OurProductController {
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  @UploadMultipleFields([
-    { name: 'logo', maxCount: 1 },
-  ])
   async update(@Param('id') id: string, @Body() updateOurProductDto: UpdateOurProductDto) {
     const data = await this.ourProductService.update(+id, updateOurProductDto);
     return {

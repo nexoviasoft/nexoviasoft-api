@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus
 import { CaseStudiesService } from './case-studies.service';
 import { CreateCaseStudyDto } from './dto/create-case-study.dto';
 import { UpdateCaseStudyDto } from './dto/update-case-study.dto';
-import { UploadMultipleFields } from 'src/common/decorators/file-upload.decorator';
 
 @Controller('case-studies')
 export class CaseStudiesController {
@@ -10,10 +9,6 @@ export class CaseStudiesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @UploadMultipleFields([
-    { name: 'imageUrl', maxCount: 1 },
-    { name: 'projectimage', maxCount: 10 },
-  ])
   async create(@Body() createCaseStudyDto: CreateCaseStudyDto) {
     const data = await this.caseStudiesService.create(createCaseStudyDto);
     return {
@@ -47,10 +42,6 @@ export class CaseStudiesController {
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  @UploadMultipleFields([
-    { name: 'imageUrl', maxCount: 1 },
-    { name: 'projectimage', maxCount: 10 },
-  ])
   async update(@Param('id') id: string, @Body() updateCaseStudyDto: UpdateCaseStudyDto) {
     const data = await this.caseStudiesService.update(+id, updateCaseStudyDto);
     return {

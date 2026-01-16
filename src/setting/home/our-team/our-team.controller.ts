@@ -2,7 +2,6 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post
 import { OurTeamService } from './our-team.service';
 import { CreateOurTeamDto } from './dto/create-our-team.dto';
 import { UpdateOurTeamDto } from './dto/update-our-team.dto';
-import { UploadImage } from 'src/common/decorators/file-upload.decorator';
 
 @Controller('our-team')
 export class OurTeamController {
@@ -10,7 +9,6 @@ export class OurTeamController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @UploadImage('profileImage')
   async create(@Body() createOurTeamDto: CreateOurTeamDto) {
     const data = await this.ourTeamService.create(createOurTeamDto);
     return {
@@ -66,7 +64,6 @@ export class OurTeamController {
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  @UploadImage('profileImage')
   async update(@Param('id') id: string, @Body() updateOurTeamDto: UpdateOurTeamDto) {
     const data = await this.ourTeamService.update(+id, updateOurTeamDto);
     return {

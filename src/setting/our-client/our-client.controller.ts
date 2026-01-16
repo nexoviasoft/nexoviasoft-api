@@ -2,7 +2,6 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post
 import { OurClientService } from './our-client.service';
 import { CreateOurClientDto } from './dto/create-our-client.dto';
 import { UpdateOurClientDto } from './dto/update-our-client.dto';
-import { UploadImage } from 'src/common/decorators/file-upload.decorator';
 
 @Controller('our-client')
 export class OurClientController {
@@ -10,7 +9,6 @@ export class OurClientController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @UploadImage('photo')
   async create(@Body() createOurClientDto: CreateOurClientDto) {
     const data = await this.ourClientService.create(createOurClientDto);
     return {
@@ -44,7 +42,6 @@ export class OurClientController {
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  @UploadImage('photo')
   async update(@Param('id') id: string, @Body() updateOurClientDto: UpdateOurClientDto) {
     const data = await this.ourClientService.update(+id, updateOurClientDto);
     return {
