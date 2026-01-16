@@ -35,6 +35,13 @@ export class OurService {
   @Column('simple-array', { nullable: true })
   benefit: string[];
 
+  @Column('json', { nullable: true })
+  otherservice: Array<{
+    name: string;
+    description: string;
+    isfeature: boolean;
+  }>;
+
   @ManyToOne(() => Category, { nullable: true })
   @JoinColumn({ name: 'categoryId' })
   category: Category;

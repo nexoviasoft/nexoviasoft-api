@@ -1,4 +1,16 @@
-import { IsString, IsOptional, IsArray, IsNumber } from 'class-validator';
+import { IsString, IsOptional, IsArray, IsNumber, IsBoolean, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class OtherServiceItemDto {
+  @IsString()
+  name: string;
+
+  @IsString()
+  description: string;
+
+  @IsBoolean()
+  isfeature: boolean;
+}
 
 export class CreateOurServiceDto {
   @IsOptional()
@@ -29,6 +41,12 @@ export class CreateOurServiceDto {
   @IsArray()
   @IsString({ each: true })
   benefit?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OtherServiceItemDto)
+  otherservice?: OtherServiceItemDto[];
 
   @IsOptional()
   @IsNumber()

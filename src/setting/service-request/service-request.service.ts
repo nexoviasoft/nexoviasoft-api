@@ -1,21 +1,56 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateServiceRequestDto } from './dto/create-service-request.dto';
 import { UpdateServiceRequestDto } from './dto/update-service-request.dto';
 import { ServiceRequest } from './entities/service-request.entity';
+import { EmailService } from '../../common/services/email.service';
 
 @Injectable()
 export class ServiceRequestService {
+  private readonly logger = new Logger(ServiceRequestService.name);
+
   constructor(
     @InjectRepository(ServiceRequest)
     private readonly serviceRequestRepository: Repository<ServiceRequest>,
-    
+    private readonly emailService: EmailService,
   ) {}
 
   async create(createServiceRequestDto: CreateServiceRequestDto) {
     const serviceRequest = this.serviceRequestRepository.create(createServiceRequestDto);
-    return this.serviceRequestRepository.save(serviceRequest);
+    const savedRequest = await this.serviceRequestRepository.save(serviceRequest);
+
+    // Load client relation to get email
+    const serviceRequestWithClient = await this.serviceRequestRepository.findOne({
+      where: { id: savedRequest.id },
+      relations: ['client'],
+    });
+
+    // Send confirmation email to client if email exists
+    if (serviceRequestWithClient?.client?.email) {
+      try {
+        await this.emailService.sendServiceRequestConfirmation(
+          serviceRequestWithClient.client.email,
+          serviceRequestWithClient.client.name || 'Valued Client',
+          createServiceRequestDto.serviceType,
+        );
+        this.logger.log(
+          `Confirmation email sent to ${serviceRequestWithClient.client.email} for service request ${savedRequest.id}`,
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failed to send confirmation email for service request ${savedRequest.id}:`,
+          error,
+        );
+        // Don't throw error - service request is already created
+      }
+    } else {
+      this.logger.warn(
+        `No client email found for service request ${savedRequest.id}, skipping email notification`,
+      );
+    }
+
+    return savedRequest;
   }
 
   async findAll() {
