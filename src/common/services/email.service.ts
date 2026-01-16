@@ -8,8 +8,6 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
   private readonly smtpConfig = {
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
     user: 'khataxinfo@gmail.com',
     password: 'jkqw gwbu ibip zrga',
   };
@@ -17,8 +15,6 @@ export class EmailService {
   constructor() {
     this.transporter = nodemailer.createTransport({
       host: this.smtpConfig.host,
-      port: this.smtpConfig.port,
-      secure: this.smtpConfig.secure,
       auth: {
         user: this.smtpConfig.user,
         pass: this.smtpConfig.password,

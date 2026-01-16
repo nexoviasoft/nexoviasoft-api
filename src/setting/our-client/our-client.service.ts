@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateOurClientDto } from './dto/create-our-client.dto';
@@ -13,6 +13,18 @@ export class OurClientService {
   ) {}
 
   async create(createOurClientDto: CreateOurClientDto) {
+    // Check if client with this email already exists
+    const existingClient = await this.ourClientRepository.findOne({
+      where: { email: createOurClientDto.email },
+    });
+
+    if (existingClient) {
+      throw new ConflictException({
+        statusCode: HttpStatus.CONFLICT,
+        message: `Client with email ${createOurClientDto.email} already exists`,
+      });
+    }
+
     const client = this.ourClientRepository.create(createOurClientDto);
     return this.ourClientRepository.save(client);
   }
