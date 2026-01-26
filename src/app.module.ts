@@ -17,6 +17,8 @@ import { CommonModule } from './common/common.module';
 import { ServiceRequestModule } from './setting/service-request/service-request.module';
 import { OurServiceModule } from './setting/our-service/our-service.module';
 import { OurProductModule } from './setting/our-product/our-product.module';
+import { AttendanceModule } from './attendance/attendance.module';
+import { ScheduleModule } from './schedule/schedule.module';
 
 
 @Module({
@@ -64,6 +66,8 @@ import { OurProductModule } from './setting/our-product/our-product.module';
     ServiceRequestModule,
     OurServiceModule,
     OurProductModule,
+    AttendanceModule,
+    ScheduleModule,
   ],
   controllers: [AppController],
   providers: [AppService],

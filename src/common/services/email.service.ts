@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { getServiceRequestConfirmationTemplate } from '../templates/service-request-confirmation.template';
+import { getScheduleAssignmentTemplate } from '../templates/schedule-assignment.template';
 
 @Injectable()
 export class EmailService {
@@ -41,6 +42,37 @@ export class EmailService {
       this.logger.log(`Service request confirmation email sent to ${to}`);
     } catch (error) {
       this.logger.error(`Failed to send email to ${to}:`, error);
+      throw error;
+    }
+  }
+
+  async sendScheduleAssignment(
+    to: string,
+    teamMemberName: string,
+    shifts: Array<{ time?: string; label?: string; type?: string } | null>,
+    weekStartDate?: string,
+    weekEndDate?: string,
+  ): Promise<void> {
+    const subject = 'New Schedule Assignment - SquadLog';
+    const fromEmail = this.smtpConfig.user;
+    const html = getScheduleAssignmentTemplate(
+      teamMemberName,
+      shifts,
+      fromEmail,
+      weekStartDate,
+      weekEndDate,
+    );
+
+    try {
+      await this.transporter.sendMail({
+        from: fromEmail,
+        to,
+        subject,
+        html,
+      });
+      this.logger.log(`Schedule assignment email sent to ${to}`);
+    } catch (error) {
+      this.logger.error(`Failed to send schedule assignment email to ${to}:`, error);
       throw error;
     }
   }
