@@ -19,6 +19,7 @@ import { OurServiceModule } from './setting/our-service/our-service.module';
 import { OurProductModule } from './setting/our-product/our-product.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { ScheduleModule } from './schedule/schedule.module';
+import { ProjectsModule } from './projects/projects.module';
 
 
 @Module({
@@ -68,6 +69,7 @@ import { ScheduleModule } from './schedule/schedule.module';
     OurProductModule,
     AttendanceModule,
     ScheduleModule,
+    ProjectsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
