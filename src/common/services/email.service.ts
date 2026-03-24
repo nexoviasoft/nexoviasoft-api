@@ -15,8 +15,8 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
   private readonly smtpConfig = {
     host: 'smtp.gmail.com',
-    user: 'khataxinfo@gmail.com',
-    password: 'jkqw gwbu ibip zrga',
+    user: 'innowavesolutioninfo@gmail.com',
+    pass: 'eydh kgcs wplp avzv',
   };
 
   constructor() {
