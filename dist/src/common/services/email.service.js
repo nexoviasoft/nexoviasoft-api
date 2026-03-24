@@ -54,13 +54,15 @@ const leave_approval_template_1 = require("../templates/leave-approval.template"
 const leave_rejection_template_1 = require("../templates/leave-rejection.template");
 const document_email_template_1 = require("../templates/document-email.template");
 const meeting_invitation_template_1 = require("../templates/meeting-invitation.template");
+const team_member_credentials_template_1 = require("../templates/team-member-credentials.template");
+const project_assignment_template_1 = require("../templates/project-assignment.template");
 let EmailService = EmailService_1 = class EmailService {
     constructor() {
         this.logger = new common_1.Logger(EmailService_1.name);
         this.smtpConfig = {
             host: 'smtp.gmail.com',
-            user: 'khataxinfo@gmail.com',
-            password: 'jkqw gwbu ibip zrga',
+            user: 'innowavesolutioninfo@gmail.com',
+            password: 'eydh kgcs wplp avzv',
         };
         this.transporter = nodemailer.createTransport({
             host: this.smtpConfig.host,
@@ -200,6 +202,42 @@ let EmailService = EmailService_1 = class EmailService {
         }
         catch (error) {
             this.logger.error(`Failed to send document email to ${to}:`, error);
+            throw error;
+        }
+    }
+    async sendTeamMemberCredentials(to, memberName, passwordPlain, position) {
+        const subject = 'Welcome to SquadLog - Your Login Credentials';
+        const fromEmail = this.smtpConfig.user;
+        const html = (0, team_member_credentials_template_1.getTeamMemberCredentialsTemplate)(memberName, to, passwordPlain, position, fromEmail);
+        try {
+            await this.transporter.sendMail({
+                from: fromEmail,
+                to,
+                subject,
+                html,
+            });
+            this.logger.log(`Team member credentials email sent to ${to}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send team member credentials email to ${to}:`, error);
+            throw error;
+        }
+    }
+    async sendProjectAssignment(to, memberName, projectName, projectRole) {
+        const subject = `New Project Assignment: ${projectName}`;
+        const fromEmail = this.smtpConfig.user;
+        const html = (0, project_assignment_template_1.getProjectAssignmentTemplate)(memberName, projectName, projectRole, fromEmail);
+        try {
+            await this.transporter.sendMail({
+                from: fromEmail,
+                to,
+                subject,
+                html,
+            });
+            this.logger.log(`Project assignment email sent to ${to} for project: ${projectName}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send project assignment email to ${to}:`, error);
             throw error;
         }
     }

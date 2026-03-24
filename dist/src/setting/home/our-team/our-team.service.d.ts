@@ -2,9 +2,11 @@ import { Repository } from 'typeorm';
 import { CreateOurTeamDto } from './dto/create-our-team.dto';
 import { UpdateOurTeamDto } from './dto/update-our-team.dto';
 import { OurTeam } from './entities/our-team.entity';
+import { EmailService } from '../../../common/services/email.service';
 export declare class OurTeamService {
     private readonly ourTeamRepository;
-    constructor(ourTeamRepository: Repository<OurTeam>);
+    private readonly emailService;
+    constructor(ourTeamRepository: Repository<OurTeam>, emailService: EmailService);
     create(createOurTeamDto: CreateOurTeamDto): Promise<OurTeam>;
     findAll(): Promise<OurTeam[]>;
     findAllPublic(): Promise<{

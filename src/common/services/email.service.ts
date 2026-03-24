@@ -9,6 +9,7 @@ import { getLeaveRejectionTemplate } from '../templates/leave-rejection.template
 import { getDocumentEmailTemplate } from '../templates/document-email.template';
 import { getMeetingInvitationTemplate } from '../templates/meeting-invitation.template';
 import { getTeamMemberCredentialsTemplate } from '../templates/team-member-credentials.template';
+import { getProjectAssignmentTemplate } from '../templates/project-assignment.template';
 
 @Injectable()
 export class EmailService {
@@ -300,6 +301,35 @@ export class EmailService {
       this.logger.log(`Team member credentials email sent to ${to}`);
     } catch (error) {
       this.logger.error(`Failed to send team member credentials email to ${to}:`, error);
+      throw error;
+    }
+  }
+
+  async sendProjectAssignment(
+    to: string,
+    memberName: string,
+    projectName: string,
+    projectRole: string,
+  ): Promise<void> {
+    const subject = `New Project Assignment: ${projectName}`;
+    const fromEmail = this.smtpConfig.user;
+    const html = getProjectAssignmentTemplate(
+      memberName,
+      projectName,
+      projectRole,
+      fromEmail,
+    );
+
+    try {
+      await this.transporter.sendMail({
+        from: fromEmail,
+        to,
+        subject,
+        html,
+      });
+      this.logger.log(`Project assignment email sent to ${to} for project: ${projectName}`);
+    } catch (error) {
+      this.logger.error(`Failed to send project assignment email to ${to}:`, error);
       throw error;
     }
   }

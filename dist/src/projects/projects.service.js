@@ -18,10 +18,12 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const project_entity_1 = require("./entities/project.entity");
 const our_team_entity_1 = require("../setting/home/our-team/entities/our-team.entity");
+const email_service_1 = require("../common/services/email.service");
 let ProjectsService = class ProjectsService {
-    constructor(projectRepository, teamRepository) {
+    constructor(projectRepository, teamRepository, emailService) {
         this.projectRepository = projectRepository;
         this.teamRepository = teamRepository;
+        this.emailService = emailService;
     }
     async create(createProjectDto) {
         const { teamMemberIds, dueDate, ...projectData } = createProjectDto;
@@ -44,13 +46,31 @@ let ProjectsService = class ProjectsService {
         if (!projectWithRelations) {
             throw new common_1.NotFoundException(`Failed to load project after creation`);
         }
+        const projectName = projectWithRelations.name;
+        if (projectWithRelations.projectLead && projectWithRelations.projectLead.email) {
+            this.emailService.sendProjectAssignment(projectWithRelations.projectLead.email, `${projectWithRelations.projectLead.firstName} ${projectWithRelations.projectLead.lastName}`, projectName, 'Project Lead').catch(e => console.error('Failed to send email to project lead', e));
+        }
+        if (projectWithRelations.teamMembers && projectWithRelations.teamMembers.length > 0) {
+            for (const member of projectWithRelations.teamMembers) {
+                if (member.email && member.id !== projectWithRelations.projectLead?.id) {
+                    this.emailService.sendProjectAssignment(member.email, `${member.firstName} ${member.lastName}`, projectName, 'Team Member').catch(e => console.error('Failed to send email to team member', e));
+                }
+            }
+        }
         return this.formatProjectResponse(projectWithRelations);
     }
-    async findAll() {
-        const projects = await this.projectRepository.find({
+    async findAll(user) {
+        const query = {
             relations: ['department', 'projectLead', 'teamMembers'],
             order: { createdAt: 'DESC' },
-        });
+        };
+        if (user && user.role === 'Employee') {
+            query.where = [
+                { projectLeadId: user.id },
+                { teamMembers: { id: user.id } }
+            ];
+        }
+        const projects = await this.projectRepository.find(query);
         return projects.map((project) => this.formatProjectResponse(project));
     }
     async findOne(id) {
@@ -71,6 +91,8 @@ let ProjectsService = class ProjectsService {
         if (!project) {
             throw new common_1.NotFoundException(`Project with ID ${id} not found`);
         }
+        const oldTeamMemberIds = project.teamMembers?.map(m => m.id) || [];
+        const oldProjectLeadId = project.projectLead?.id;
         const { teamMemberIds, ...updateData } = updateProjectDto;
         if (updateProjectDto.dueDate) {
             updateData.dueDate = new Date(updateProjectDto.dueDate);
@@ -94,6 +116,17 @@ let ProjectsService = class ProjectsService {
         });
         if (!projectWithRelations) {
             throw new common_1.NotFoundException(`Failed to load project after update`);
+        }
+        const projectName = projectWithRelations.name;
+        if (projectWithRelations.projectLead && projectWithRelations.projectLead.id !== oldProjectLeadId) {
+            this.emailService.sendProjectAssignment(projectWithRelations.projectLead.email, `${projectWithRelations.projectLead.firstName} ${projectWithRelations.projectLead.lastName}`, projectName, 'Project Lead').catch(e => console.error('Failed to send email to project lead', e));
+        }
+        if (projectWithRelations.teamMembers && projectWithRelations.teamMembers.length > 0) {
+            for (const member of projectWithRelations.teamMembers) {
+                if (!oldTeamMemberIds.includes(member.id) && member.id !== projectWithRelations.projectLead?.id) {
+                    this.emailService.sendProjectAssignment(member.email, `${member.firstName} ${member.lastName}`, projectName, 'Team Member').catch(e => console.error('Failed to send email to team member', e));
+                }
+            }
         }
         return this.formatProjectResponse(projectWithRelations);
     }
@@ -171,6 +204,7 @@ exports.ProjectsService = ProjectsService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(project_entity_1.Project)),
     __param(1, (0, typeorm_1.InjectRepository)(our_team_entity_1.OurTeam)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        email_service_1.EmailService])
 ], ProjectsService);
 //# sourceMappingURL=projects.service.js.map

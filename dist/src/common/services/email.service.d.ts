@@ -2,6 +2,7 @@ export declare class EmailService {
     private readonly logger;
     private transporter;
     private readonly smtpConfig;
+    ß: any;
     constructor();
     sendServiceRequestConfirmation(to: string, clientName: string, serviceType: string): Promise<void>;
     sendScheduleAssignment(to: string, teamMemberName: string, shifts: Array<{
@@ -14,6 +15,8 @@ export declare class EmailService {
     sendLeaveApproval(to: string, employeeName: string, leaveType: string, startDate: string, endDate: string, days: number, reason: string | null): Promise<void>;
     sendLeaveRejection(to: string, employeeName: string, leaveType: string, startDate: string, endDate: string, days: number, reason: string | null, rejectionReason?: string): Promise<void>;
     sendDocumentEmail(to: string, clientName: string, subject: string, message: string, pdfHtml: string, documentType: string, documentNumber: string): Promise<void>;
+    sendTeamMemberCredentials(to: string, memberName: string, passwordPlain: string, position: string): Promise<void>;
+    sendProjectAssignment(to: string, memberName: string, projectName: string, projectRole: string): Promise<void>;
     sendGenericEmail(to: string | string[], subject: string, htmlBody: string): Promise<void>;
     sendMeetingInvitations(params: {
         to: string[];

@@ -16,6 +16,7 @@ import { TaskComment } from './entities/task-comment.entity';
 import { ProjectComment } from './entities/project-comment.entity';
 import { ProjectColumn } from './entities/column.entity';
 import { OurTeam } from '../setting/home/our-team/entities/our-team.entity';
+import { EmailService } from '../common/services/email.service';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { OurTeam } from '../setting/home/our-team/entities/our-team.entity';
     TaskCommentsService,
     ProjectCommentsService,
     ColumnsService,
+    EmailService,
   ],
   exports: [
     ProjectsService,

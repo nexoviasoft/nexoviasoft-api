@@ -5,6 +5,7 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { Project } from './entities/project.entity';
 import { OurTeam } from '../setting/home/our-team/entities/our-team.entity';
+import { EmailService } from '../common/services/email.service';
 
 @Injectable()
 export class ProjectsService {
@@ -13,6 +14,7 @@ export class ProjectsService {
     private readonly projectRepository: Repository<Project>,
     @InjectRepository(OurTeam)
     private readonly teamRepository: Repository<OurTeam>,
+    private readonly emailService: EmailService,
   ) {}
 
   async create(createProjectDto: CreateProjectDto) {
@@ -45,14 +47,47 @@ export class ProjectsService {
       throw new NotFoundException(`Failed to load project after creation`);
     }
 
+    // Send assignment emails
+    const projectName = projectWithRelations.name;
+    if (projectWithRelations.projectLead && projectWithRelations.projectLead.email) {
+      this.emailService.sendProjectAssignment(
+        projectWithRelations.projectLead.email,
+        `${projectWithRelations.projectLead.firstName} ${projectWithRelations.projectLead.lastName}`,
+        projectName,
+        'Project Lead'
+      ).catch(e => console.error('Failed to send email to project lead', e));
+    }
+
+    if (projectWithRelations.teamMembers && projectWithRelations.teamMembers.length > 0) {
+      for (const member of projectWithRelations.teamMembers) {
+        if (member.email && member.id !== projectWithRelations.projectLead?.id) {
+          this.emailService.sendProjectAssignment(
+            member.email,
+            `${member.firstName} ${member.lastName}`,
+            projectName,
+            'Team Member'
+          ).catch(e => console.error('Failed to send email to team member', e));
+        }
+      }
+    }
+
     return this.formatProjectResponse(projectWithRelations);
   }
 
-  async findAll() {
-    const projects = await this.projectRepository.find({
+  async findAll(user?: any) {
+    const query: any = {
       relations: ['department', 'projectLead', 'teamMembers'],
       order: { createdAt: 'DESC' },
-    });
+    };
+
+    if (user && user.role === 'Employee') {
+      query.where = [
+        { projectLeadId: user.id },
+        { teamMembers: { id: user.id } }
+      ];
+    }
+
+    const projects = await this.projectRepository.find(query);
     return projects.map((project) => this.formatProjectResponse(project));
   }
 
@@ -78,6 +113,9 @@ export class ProjectsService {
     if (!project) {
       throw new NotFoundException(`Project with ID ${id} not found`);
     }
+
+    const oldTeamMemberIds = project.teamMembers?.map(m => m.id) || [];
+    const oldProjectLeadId = project.projectLead?.id;
 
     const { teamMemberIds, ...updateData } = updateProjectDto;
     
@@ -109,6 +147,30 @@ export class ProjectsService {
 
     if (!projectWithRelations) {
       throw new NotFoundException(`Failed to load project after update`);
+    }
+
+    // Send assignment emails to newly assigned members
+    const projectName = projectWithRelations.name;
+    if (projectWithRelations.projectLead && projectWithRelations.projectLead.id !== oldProjectLeadId) {
+      this.emailService.sendProjectAssignment(
+        projectWithRelations.projectLead.email,
+        `${projectWithRelations.projectLead.firstName} ${projectWithRelations.projectLead.lastName}`,
+        projectName,
+        'Project Lead'
+      ).catch(e => console.error('Failed to send email to project lead', e));
+    }
+
+    if (projectWithRelations.teamMembers && projectWithRelations.teamMembers.length > 0) {
+      for (const member of projectWithRelations.teamMembers) {
+        if (!oldTeamMemberIds.includes(member.id) && member.id !== projectWithRelations.projectLead?.id) {
+          this.emailService.sendProjectAssignment(
+            member.email,
+            `${member.firstName} ${member.lastName}`,
+            projectName,
+            'Team Member'
+          ).catch(e => console.error('Failed to send email to team member', e));
+        }
+      }
     }
 
     return this.formatProjectResponse(projectWithRelations);

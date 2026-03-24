@@ -51,9 +51,11 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const our_team_entity_1 = require("./entities/our-team.entity");
 const bcrypt = __importStar(require("bcrypt"));
+const email_service_1 = require("../../../common/services/email.service");
 let OurTeamService = class OurTeamService {
-    constructor(ourTeamRepository) {
+    constructor(ourTeamRepository, emailService) {
         this.ourTeamRepository = ourTeamRepository;
+        this.emailService = emailService;
     }
     async create(createOurTeamDto) {
         const hashedPassword = await bcrypt.hash(createOurTeamDto.password, 10);
@@ -64,7 +66,12 @@ let OurTeamService = class OurTeamService {
             hireDate: hireDate ? new Date(hireDate) : null,
             dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
         });
-        return this.ourTeamRepository.save(employee);
+        const savedEmployee = await this.ourTeamRepository.save(employee);
+        if (savedEmployee.email) {
+            this.emailService.sendTeamMemberCredentials(savedEmployee.email, `${savedEmployee.firstName} ${savedEmployee.lastName}`, createOurTeamDto.password, savedEmployee.position || 'Team Member').catch(err => {
+            });
+        }
+        return savedEmployee;
     }
     findAll() {
         return this.ourTeamRepository.find({
@@ -141,6 +148,7 @@ exports.OurTeamService = OurTeamService;
 exports.OurTeamService = OurTeamService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(our_team_entity_1.OurTeam)),
-    __metadata("design:paramtypes", [typeorm_2.Repository])
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        email_service_1.EmailService])
 ], OurTeamService);
 //# sourceMappingURL=our-team.service.js.map

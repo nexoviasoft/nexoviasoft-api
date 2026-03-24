@@ -25,6 +25,7 @@ const task_comment_entity_1 = require("./entities/task-comment.entity");
 const project_comment_entity_1 = require("./entities/project-comment.entity");
 const column_entity_1 = require("./entities/column.entity");
 const our_team_entity_1 = require("../setting/home/our-team/entities/our-team.entity");
+const email_service_1 = require("../common/services/email.service");
 let ProjectsModule = class ProjectsModule {
 };
 exports.ProjectsModule = ProjectsModule;
@@ -53,6 +54,7 @@ exports.ProjectsModule = ProjectsModule = __decorate([
             task_comments_service_1.TaskCommentsService,
             project_comments_service_1.ProjectCommentsService,
             columns_service_1.ColumnsService,
+            email_service_1.EmailService,
         ],
         exports: [
             projects_service_1.ProjectsService,

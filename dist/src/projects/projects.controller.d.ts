@@ -50,7 +50,7 @@ export declare class ProjectsController {
         createdAt: Date;
         updatedAt: Date;
     }>;
-    findAll(): Promise<{
+    findAll(req: any): Promise<{
         id: number;
         name: string;
         description: string;

@@ -3,10 +3,12 @@ import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { Project } from './entities/project.entity';
 import { OurTeam } from '../setting/home/our-team/entities/our-team.entity';
+import { EmailService } from '../common/services/email.service';
 export declare class ProjectsService {
     private readonly projectRepository;
     private readonly teamRepository;
-    constructor(projectRepository: Repository<Project>, teamRepository: Repository<OurTeam>);
+    private readonly emailService;
+    constructor(projectRepository: Repository<Project>, teamRepository: Repository<OurTeam>, emailService: EmailService);
     create(createProjectDto: CreateProjectDto): Promise<{
         id: number;
         name: string;
@@ -53,7 +55,7 @@ export declare class ProjectsService {
         createdAt: Date;
         updatedAt: Date;
     }>;
-    findAll(): Promise<{
+    findAll(user?: any): Promise<{
         id: number;
         name: string;
         description: string;
