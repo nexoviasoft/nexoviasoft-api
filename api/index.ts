@@ -1,3 +1,4 @@
+// @ts-ignore - Vercel type missing
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { getApp } from '../src/get-app';
 

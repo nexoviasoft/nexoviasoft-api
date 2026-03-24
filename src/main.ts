@@ -1,7 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
+// @ts-ignore - Vercel type missing
 import { VercelRequest, VercelResponse } from '@vercel/node';
+import { json, urlencoded } from 'express';
 
 let cachedApp: NestExpressApplication;
 
@@ -13,6 +15,9 @@ async function bootstrap() {
       origin: true, // ✅ সব domain allow
       credentials: false, // optional: cookie/credential নেই
     });
+
+    app.use(json({ limit: '50mb' }));
+    app.use(urlencoded({ extended: true, limit: '50mb' }));
 
     await app.init();
     cachedApp = app;

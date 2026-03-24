@@ -16,4 +16,6 @@ export declare class Candidate {
     interviews: Interview[];
     createdAt: Date;
     updatedAt: Date;
+    cvData: string;
+    cvFilename: string;
 }

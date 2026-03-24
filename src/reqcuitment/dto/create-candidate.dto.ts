@@ -38,4 +38,12 @@ export class CreateCandidateDto {
   @IsOptional()
   @IsNumber()
   jobPostingId?: number;
+
+  @IsOptional()
+  @IsString()
+  cvData?: string;
+
+  @IsOptional()
+  @IsString()
+  cvFilename?: string;
 }

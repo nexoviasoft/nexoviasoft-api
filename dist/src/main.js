@@ -3,26 +3,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = handler;
 const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
+const express_1 = require("express");
 let cachedApp;
 async function bootstrap() {
     if (!cachedApp) {
         const app = await core_1.NestFactory.create(app_module_1.AppModule);
         app.enableCors({
-            origin: [
-                'http://localhost:3000',
-                'http://localhost:5173',
-                'https://squadlog.up.railway.app',
-                'https://squadlog-console.up.railway.app',
-            ],
-            methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-            allowedHeaders: [
-                'Content-Type',
-                'Authorization',
-                'Accept',
-                'X-Requested-With',
-            ],
-            credentials: true,
+            origin: true,
+            credentials: false,
         });
+        app.use((0, express_1.json)({ limit: '50mb' }));
+        app.use((0, express_1.urlencoded)({ extended: true, limit: '50mb' }));
         await app.init();
         cachedApp = app;
     }
