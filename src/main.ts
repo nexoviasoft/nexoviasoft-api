@@ -1,19 +1,37 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { VercelRequest, VercelResponse } from '@vercel/node';
+
+let cachedApp: NestExpressApplication;
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  if (!cachedApp) {
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:5173','https://squadlog.up.railway.app','https://squadlog-console.up.railway.app'],
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With'],
-    credentials: true,
-  });
+    app.enableCors({
+      origin: true, // ✅ সব domain allow
+      credentials: false, // optional: cookie/credential নেই
+    });
 
-  const port = process.env.PORT || 5001;
-  await app.listen(port, '0.0.0.0');
-  console.log(`Application is running on: ${await app.getUrl()}`);
+    await app.init();
+    cachedApp = app;
+  }
+  return cachedApp;
 }
-bootstrap();
+
+// Only listen locally, Vercel will use the exported handler
+if (process.env.VERCEL !== '1' && process.env.NODE_ENV !== 'production') {
+  bootstrap().then(async (app) => {
+    const port = process.env.PORT || 5001;
+    await app.listen(port, '0.0.0.0');
+    console.log(`Application is running on: ${await app.getUrl()}`);
+  });
+}
+
+// Export the handler for Vercel
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const app = await bootstrap();
+  const server = app.getHttpAdapter().getInstance();
+  return server(req, res);
+}
