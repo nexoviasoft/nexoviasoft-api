@@ -1,9 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Param,
+  Patch,
+  Query,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { ScheduleService } from './schedule.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { UpdateScheduleDto } from './dto/update-schedule.dto';
 
 @Controller('schedule')
+@UseGuards(AuthGuard('jwt'))
 export class ScheduleController {
   constructor(private readonly scheduleService: ScheduleService) {}
 
@@ -13,8 +26,12 @@ export class ScheduleController {
   }
 
   @Get()
-  findAll() {
-    return this.scheduleService.findAll();
+  findAll(
+    @Request() req,
+    @Query('weekStartDate') weekStartDate?: string,
+    @Query('weekEndDate') weekEndDate?: string,
+  ) {
+    return this.scheduleService.findAll(req.user, { weekStartDate, weekEndDate });
   }
 
   @Get(':id')

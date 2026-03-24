@@ -8,19 +8,30 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { AttendanceService } from './attendance.service';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @Controller('attendance')
+@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createAttendanceDto: CreateAttendanceDto) {
-    const data = await this.attendanceService.create(createAttendanceDto);
+  async create(@Req() req: any, @Body() createAttendanceDto: CreateAttendanceDto) {
+    const teamId = req?.user?.id;
+    const payload: CreateAttendanceDto = {
+      ...createAttendanceDto,
+      teamId,
+    };
+    const data = await this.attendanceService.create(payload);
     return {
       statusCode: HttpStatus.CREATED,
       message: 'Attendance created successfully',
@@ -39,6 +50,18 @@ export class AttendanceController {
     };
   }
 
+  @Get('me')
+  @HttpCode(HttpStatus.OK)
+  async findMine(@Req() req: any) {
+    const teamId = req?.user?.id;
+    const data = await this.attendanceService.findMine(teamId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'My attendance retrieved successfully',
+      data,
+    };
+  }
+
   @Get('stats')
   @HttpCode(HttpStatus.OK)
   async getStatusStats() {
@@ -46,6 +69,18 @@ export class AttendanceController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Attendance statistics retrieved successfully',
+      data,
+    };
+  }
+
+  @Get('me/stats')
+  @HttpCode(HttpStatus.OK)
+  async getMyStatusStats(@Req() req: any) {
+    const teamId = req?.user?.id;
+    const data = await this.attendanceService.getMyStatusStats(teamId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'My attendance statistics retrieved successfully',
       data,
     };
   }
@@ -77,6 +112,18 @@ export class AttendanceController {
     return {
       statusCode: HttpStatus.OK,
       message: 'Attendance updated successfully',
+      data,
+    };
+  }
+
+  @Patch(':id/approve')
+  @HttpCode(HttpStatus.OK)
+  @Roles('admin')
+  async approve(@Param('id') id: string) {
+    const data = await this.attendanceService.update(+id, { approved: true });
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Attendance approved successfully',
       data,
     };
   }

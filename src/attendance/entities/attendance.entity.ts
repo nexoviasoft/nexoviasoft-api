@@ -26,6 +26,9 @@ export class Attendance {
   @Column()
   status: string; // "On Time", "Late", "Absent"
 
+  @Column({ type: 'boolean', default: false })
+  approved: boolean;
+
   @ManyToOne(() => OurTeam, { nullable: true })
   @JoinColumn({ name: 'teamId' })
   team: OurTeam;

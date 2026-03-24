@@ -1,0 +1,442 @@
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { MoreThan, Repository } from 'typeorm';
+import { Attendance } from '../attendance/entities/attendance.entity';
+import { Leave } from '../leave/entities/leave.entity';
+import { Meeting } from '../meeting/entities/meeting.entity';
+import { Order } from '../order/entities/order.entity';
+import { Payroll } from '../payroll/entities/payroll.entity';
+import { Schedule } from '../schedule/entities/schedule.entity';
+import { OurClient } from '../setting/our-client/entities/our-client.entity';
+
+type DashboardPeriod = 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+
+@Injectable()
+export class DashboardService {
+  constructor(
+    @InjectRepository(OurClient)
+    private readonly clientRepository: Repository<OurClient>,
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
+    @InjectRepository(Payroll)
+    private readonly payrollRepository: Repository<Payroll>,
+    @InjectRepository(Attendance)
+    private readonly attendanceRepository: Repository<Attendance>,
+    @InjectRepository(Leave)
+    private readonly leaveRepository: Repository<Leave>,
+    @InjectRepository(Meeting)
+    private readonly meetingRepository: Repository<Meeting>,
+    @InjectRepository(Schedule)
+    private readonly scheduleRepository: Repository<Schedule>,
+  ) {}
+
+  async getActivity(tab?: string) {
+    const t = String(tab || 'attendance').toLowerCase();
+
+    if (t === 'leave' || t === 'leave request' || t === 'leave-requests' || t === 'leaverequest') {
+      const leaves = await this.leaveRepository.find({
+        relations: ['team'],
+        order: { createdAt: 'DESC' },
+        take: 8,
+      });
+
+      return {
+        tab: 'Leave',
+        items: leaves.map((l) => ({
+          id: l.id,
+          type: l.type,
+          startDate: l.startDate,
+          endDate: l.endDate,
+          days: l.days,
+          status: l.status,
+          createdAt: l.createdAt,
+          team: l.team
+            ? {
+                id: l.team.id,
+                name: `${l.team.firstName} ${l.team.lastName}`.trim(),
+                role: l.team.role,
+                avatar: l.team.profileImage,
+              }
+            : null,
+        })),
+      };
+    }
+
+    if (t === 'finance') {
+      const orders = await this.orderRepository.find({
+        relations: ['client'],
+        order: { createdAt: 'DESC' },
+        take: 8,
+      });
+
+      return {
+        tab: 'Finance',
+        items: orders.map((o) => ({
+          id: o.id,
+          orderId: (o as any).orderId,
+          service: (o as any).service,
+          amount: Number((o as any).amount || 0),
+          status: (o as any).status,
+          createdAt: (o as any).createdAt,
+          client: (o as any).client
+            ? {
+                id: (o as any).client.id,
+                name: (o as any).client.name,
+              }
+            : null,
+        })),
+      };
+    }
+
+    // default: attendance activity
+    const attendanceRows = await this.attendanceRepository.find({
+      relations: ['team'],
+      order: { createdAt: 'DESC' },
+      take: 8,
+    });
+
+    return {
+      tab: 'Attendance',
+      items: attendanceRows.map((a) => ({
+        id: a.id,
+        checkIn: a.checkIn || '-',
+        checkOut: a.checkOut || '-',
+        workHours: a.workHours || '-',
+        status: a.status,
+        createdAt: a.createdAt,
+        team: a.team
+          ? {
+              id: a.team.id,
+              name: `${a.team.firstName} ${a.team.lastName}`.trim(),
+              role: a.team.role,
+              avatar: a.team.profileImage,
+            }
+          : null,
+      })),
+    };
+  }
+
+  private normalizePeriod(period?: string): DashboardPeriod {
+    const p = String(period || '').toLowerCase();
+    if (p === 'weekly') return 'weekly';
+    if (p === 'monthly') return 'monthly';
+    if (p === 'quarterly') return 'quarterly';
+    return 'yearly';
+  }
+
+  private startOfDay(d: Date) {
+    const x = new Date(d);
+    x.setHours(0, 0, 0, 0);
+    return x;
+  }
+
+  async getSummary(_user?: { id?: number; role?: string }) {
+    const now = new Date();
+    const activeCustomersSince = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const [totalCustomers, activeCustomers, orderAmounts, payrollTotals, attendanceRows, nextMeeting] =
+      await Promise.all([
+        this.clientRepository.count(),
+        this.orderRepository
+          .createQueryBuilder('o')
+          .select('COUNT(DISTINCT o.clientId)', 'count')
+          .where('o.createdAt >= :since', { since: activeCustomersSince.toISOString() })
+          .getRawOne<{ count: string }>(),
+        this.orderRepository.find({ select: ['amount'] }),
+        this.payrollRepository
+          .createQueryBuilder('p')
+          .select('COALESCE(SUM(p.netPay), 0)', 'totalCost')
+          .getRawOne<{ totalCost: string }>(),
+        this.attendanceRepository.find({
+          relations: ['team'],
+          order: { createdAt: 'DESC' },
+          take: 8,
+        }),
+        this.meetingRepository.findOne({
+          where: { dateTime: MoreThan(now) },
+          order: { dateTime: 'ASC' },
+        }),
+      ]);
+
+    const revenueTotal = orderAmounts.reduce((sum, o) => sum + Number((o as any).amount || 0), 0);
+    const expenseTotal = Number(payrollTotals?.totalCost ?? 0);
+    const profitTotal = revenueTotal - expenseTotal;
+
+    // Attendance stats (same logic as AttendanceService.getStatusStats, but localized here)
+    const allAttendances = await this.attendanceRepository.find();
+    const stats = { total: allAttendances.length, onTime: 0, late: 0, absent: 0 };
+    allAttendances.forEach((a) => {
+      const s = a.status?.toLowerCase();
+      if (s === 'on time') stats.onTime++;
+      else if (s === 'late') stats.late++;
+      else if (s === 'absent') stats.absent++;
+    });
+
+    const attendanceStats = {
+      total: stats.total,
+      onTime: stats.onTime,
+      late: stats.late,
+      absent: stats.absent,
+      onTimePercentage: stats.total > 0 ? ((stats.onTime / stats.total) * 100).toFixed(2) : '0.00',
+      latePercentage: stats.total > 0 ? ((stats.late / stats.total) * 100).toFixed(2) : '0.00',
+      absentPercentage:
+        stats.total > 0 ? ((stats.absent / stats.total) * 100).toFixed(2) : '0.00',
+    };
+
+    const recentAttendance = attendanceRows.map((a) => ({
+      id: a.id,
+      checkIn: a.checkIn || '-',
+      checkOut: a.checkOut || '-',
+      workHours: a.workHours || '-',
+      status: a.status,
+      createdAt: a.createdAt,
+      team: a.team
+        ? {
+            id: a.team.id,
+            name: `${a.team.firstName} ${a.team.lastName}`.trim(),
+            role: a.team.role,
+            avatar: a.team.profileImage,
+          }
+        : null,
+    }));
+
+    // Optional: latest schedules (can be used later to replace the static Schedule section)
+    const schedules = await this.scheduleRepository.find({
+      relations: ['team'],
+      order: { id: 'DESC' },
+      take: 5,
+    });
+
+    return {
+      customers: {
+        total: totalCustomers,
+        active: Number(activeCustomers?.count ?? 0),
+      },
+      finance: {
+        revenueTotal,
+        expenseTotal,
+        profitTotal,
+      },
+      attendance: attendanceStats,
+      nextAgenda: nextMeeting
+        ? {
+            id: nextMeeting.id,
+            topic: (nextMeeting as any).topic,
+            dateTime: (nextMeeting as any).dateTime,
+            meetingLink: (nextMeeting as any).meetingLink,
+            status: (nextMeeting as any).status,
+          }
+        : null,
+      recentAttendance,
+      schedules: schedules.map((s) => ({
+        id: s.id,
+        weekStartDate: (s as any).weekStartDate,
+        weekEndDate: (s as any).weekEndDate,
+        team: (s as any).team
+          ? {
+              id: (s as any).team.id,
+              name: `${(s as any).team.firstName} ${(s as any).team.lastName}`.trim(),
+              role: (s as any).team.role,
+              avatar: (s as any).team.profileImage,
+            }
+          : null,
+      })),
+    };
+  }
+
+  async getAttendanceTrend(period?: string) {
+    const p = this.normalizePeriod(period);
+    const now = new Date();
+    const today = this.startOfDay(now);
+
+    if (p === 'weekly') {
+      // last 7 days, oldest → newest
+      const start = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000);
+
+      const rows = await this.attendanceRepository
+        .createQueryBuilder('a')
+        .select(`TO_CHAR("a"."createdAt"::date, 'YYYY-MM-DD')`, 'day')
+        .addSelect('COUNT(*)', 'total')
+        .addSelect(
+          `SUM(CASE WHEN LOWER("a"."status") IN ('on time','late') THEN 1 ELSE 0 END)`,
+          'present',
+        )
+        .where('a.createdAt >= :start', { start: start.toISOString() })
+        .groupBy('day')
+        .orderBy('day', 'ASC')
+        .getRawMany<{ day: string; total: string; present: string }>();
+
+      const map = new Map(rows.map((r) => [r.day, r]));
+      const data = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(start.getTime() + i * 24 * 60 * 60 * 1000);
+        const key = d.toISOString().slice(0, 10);
+        const r = map.get(key);
+        const total = Number(r?.total ?? 0);
+        const present = Number(r?.present ?? 0);
+        const presence = total > 0 ? Math.round((present / total) * 100) : 0;
+        const label = d.toLocaleDateString('en-US', { weekday: 'short' }); // Mon/Tue...
+        return { label, presence };
+      });
+      return { period: 'Weekly', data };
+    }
+
+    if (p === 'monthly') {
+      // last 30 days
+      const start = new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000);
+      const rows = await this.attendanceRepository
+        .createQueryBuilder('a')
+        .select(`TO_CHAR("a"."createdAt"::date, 'YYYY-MM-DD')`, 'day')
+        .addSelect('COUNT(*)', 'total')
+        .addSelect(
+          `SUM(CASE WHEN LOWER("a"."status") IN ('on time','late') THEN 1 ELSE 0 END)`,
+          'present',
+        )
+        .where('a.createdAt >= :start', { start: start.toISOString() })
+        .groupBy('day')
+        .orderBy('day', 'ASC')
+        .getRawMany<{ day: string; total: string; present: string }>();
+
+      const map = new Map(rows.map((r) => [r.day, r]));
+      const data = Array.from({ length: 30 }, (_, i) => {
+        const d = new Date(start.getTime() + i * 24 * 60 * 60 * 1000);
+        const key = d.toISOString().slice(0, 10);
+        const r = map.get(key);
+        const total = Number(r?.total ?? 0);
+        const present = Number(r?.present ?? 0);
+        const presence = total > 0 ? Math.round((present / total) * 100) : 0;
+        const label = String(d.getDate()).padStart(2, '0');
+        return { label, presence };
+      });
+      return { period: 'Monthly', data };
+    }
+
+    // yearly: 12 months
+    const start = new Date(today);
+    start.setMonth(start.getMonth() - 11);
+    start.setDate(1);
+    const rows = await this.attendanceRepository
+      .createQueryBuilder('a')
+      .select(`TO_CHAR(DATE_TRUNC('month', "a"."createdAt"), 'YYYY-MM')`, 'ym')
+      .addSelect('COUNT(*)', 'total')
+      .addSelect(
+        `SUM(CASE WHEN LOWER("a"."status") IN ('on time','late') THEN 1 ELSE 0 END)`,
+        'present',
+      )
+      .where('a.createdAt >= :start', { start: start.toISOString() })
+      .groupBy('ym')
+      .orderBy('ym', 'ASC')
+      .getRawMany<{ ym: string; total: string; present: string }>();
+
+    const map = new Map(rows.map((r) => [r.ym, r]));
+    const data = Array.from({ length: 12 }, (_, i) => {
+      const d = new Date(start);
+      d.setMonth(start.getMonth() + i);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const r = map.get(key);
+      const total = Number(r?.total ?? 0);
+      const present = Number(r?.present ?? 0);
+      const presence = total > 0 ? Math.round((present / total) * 100) : 0;
+      const label = d.toLocaleDateString('en-US', { month: 'short' });
+      return { label, presence };
+    });
+    return { period: 'Yearly', data };
+  }
+
+  async getFinanceTrend(period?: string) {
+    const p = this.normalizePeriod(period);
+    const now = new Date();
+    const today = this.startOfDay(now);
+
+    if (p === 'weekly') {
+      const start = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000);
+      const rows = await this.orderRepository
+        .createQueryBuilder('o')
+        .select(`TO_CHAR("o"."createdAt"::date, 'YYYY-MM-DD')`, 'day')
+        .addSelect(`COALESCE(SUM("o"."amount"), 0)`, 'income')
+        .where('o.createdAt >= :start', { start: start.toISOString() })
+        .groupBy('day')
+        .orderBy('day', 'ASC')
+        .getRawMany<{ day: string; income: string }>();
+
+      const map = new Map(rows.map((r) => [r.day, r]));
+      const data = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(start.getTime() + i * 24 * 60 * 60 * 1000);
+        const key = d.toISOString().slice(0, 10);
+        const income = Number(map.get(key)?.income ?? 0);
+        const label = d.toLocaleDateString('en-US', { weekday: 'short' });
+        return { label, income };
+      });
+      return { period: 'Weekly', data };
+    }
+
+    if (p === 'monthly') {
+      const start = new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000);
+      const rows = await this.orderRepository
+        .createQueryBuilder('o')
+        .select(`TO_CHAR("o"."createdAt"::date, 'YYYY-MM-DD')`, 'day')
+        .addSelect(`COALESCE(SUM("o"."amount"), 0)`, 'income')
+        .where('o.createdAt >= :start', { start: start.toISOString() })
+        .groupBy('day')
+        .orderBy('day', 'ASC')
+        .getRawMany<{ day: string; income: string }>();
+
+      const map = new Map(rows.map((r) => [r.day, r]));
+      const data = Array.from({ length: 30 }, (_, i) => {
+        const d = new Date(start.getTime() + i * 24 * 60 * 60 * 1000);
+        const key = d.toISOString().slice(0, 10);
+        const income = Number(map.get(key)?.income ?? 0);
+        const label = String(d.getDate()).padStart(2, '0');
+        return { label, income };
+      });
+      return { period: 'Monthly', data };
+    }
+
+    if (p === 'quarterly') {
+      const start = new Date(today.getTime() - 89 * 24 * 60 * 60 * 1000);
+      const rows = await this.orderRepository
+        .createQueryBuilder('o')
+        .select(`TO_CHAR("o"."createdAt"::date, 'YYYY-MM-DD')`, 'day')
+        .addSelect(`COALESCE(SUM("o"."amount"), 0)`, 'income')
+        .where('o.createdAt >= :start', { start: start.toISOString() })
+        .groupBy('day')
+        .orderBy('day', 'ASC')
+        .getRawMany<{ day: string; income: string }>();
+
+      const map = new Map(rows.map((r) => [r.day, r]));
+      const data = Array.from({ length: 90 }, (_, i) => {
+        const d = new Date(start.getTime() + i * 24 * 60 * 60 * 1000);
+        const key = d.toISOString().slice(0, 10);
+        const income = Number(map.get(key)?.income ?? 0);
+        const label = String(i + 1).padStart(2, '0');
+        return { label, income };
+      });
+      return { period: 'Quarterly', data };
+    }
+
+    // yearly
+    const start = new Date(today);
+    start.setMonth(start.getMonth() - 11);
+    start.setDate(1);
+
+    const rows = await this.orderRepository
+      .createQueryBuilder('o')
+      .select(`TO_CHAR(DATE_TRUNC('month', "o"."createdAt"), 'YYYY-MM')`, 'ym')
+      .addSelect(`COALESCE(SUM("o"."amount"), 0)`, 'income')
+      .where('o.createdAt >= :start', { start: start.toISOString() })
+      .groupBy('ym')
+      .orderBy('ym', 'ASC')
+      .getRawMany<{ ym: string; income: string }>();
+
+    const map = new Map(rows.map((r) => [r.ym, r]));
+    const data = Array.from({ length: 12 }, (_, i) => {
+      const d = new Date(start);
+      d.setMonth(start.getMonth() + i);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const income = Number(map.get(key)?.income ?? 0);
+      const label = d.toLocaleDateString('en-US', { month: 'short' });
+      return { label, income };
+    });
+    return { period: 'Yearly', data };
+  }
+}
+

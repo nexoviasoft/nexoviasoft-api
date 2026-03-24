@@ -20,6 +20,17 @@ import { OurProductModule } from './setting/our-product/our-product.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { ScheduleModule } from './schedule/schedule.module';
 import { ProjectsModule } from './projects/projects.module';
+import { AuthModule } from './auth/auth.module';
+import { OrderModule } from './order/order.module';
+import { LeaveModule } from './leave/leave.module';
+import { DocumentsModule } from './documents/documents.module';
+import { EmailAlertModule } from './email-alert/email-alert.module';
+import { ReqcuitmentModule } from './reqcuitment/reqcuitment.module';
+import { PayrollModule } from './payroll/payroll.module';
+import { ReportsModule } from './reports/reports.module';
+import { BroadcastModule } from './broadcast/broadcast.module';
+import { MeetingModule } from './meeting/meeting.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 
 @Module({
@@ -70,6 +81,17 @@ import { ProjectsModule } from './projects/projects.module';
     AttendanceModule,
     ScheduleModule,
     ProjectsModule,
+    AuthModule,
+    OrderModule,
+    LeaveModule,
+    DocumentsModule,
+    EmailAlertModule,
+    ReqcuitmentModule,
+    PayrollModule,
+    ReportsModule,
+    BroadcastModule,
+    MeetingModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

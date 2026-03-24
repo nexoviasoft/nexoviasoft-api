@@ -67,13 +67,8 @@ export class ScheduleService {
     return savedSchedule;
   }
 
-  async findAll() {
-    const schedules = await this.scheduleRepository.find({
-      relations: ['team'],
-      order: { id: 'DESC' },
-    });
-
-    return schedules.map((schedule) => ({
+  private mapSchedule(schedule: Schedule) {
+    return {
       id: schedule.id,
       teamId: schedule.teamId,
       team: schedule.team
@@ -83,6 +78,7 @@ export class ScheduleService {
             role: schedule.team.role,
             avatar: schedule.team.profileImage,
             email: schedule.team.email,
+            departmentId: schedule.team.departmentId,
           }
         : null,
       shifts: schedule.shifts,
@@ -90,7 +86,56 @@ export class ScheduleService {
       weekEndDate: schedule.weekEndDate,
       createdAt: schedule.createdAt,
       updatedAt: schedule.updatedAt,
-    }));
+    };
+  }
+
+  async findAll(
+    user: { id?: number; role?: string; departmentId?: number },
+    opts?: { weekStartDate?: string; weekEndDate?: string },
+  ) {
+    const role = (user?.role || '').toLowerCase();
+    const isPrivileged = role === 'admin' || role === 'manager';
+
+    // Optional week filter (stored as DATE in DB)
+    const weekStart = opts?.weekStartDate ? new Date(opts.weekStartDate) : undefined;
+    const weekEnd = opts?.weekEndDate ? new Date(opts.weekEndDate) : undefined;
+
+    const qb = this.scheduleRepository
+      .createQueryBuilder('schedule')
+      .leftJoinAndSelect('schedule.team', 'team')
+      .orderBy('schedule.id', 'DESC');
+
+    if (weekStart && !Number.isNaN(weekStart.getTime())) {
+      qb.andWhere('schedule.weekStartDate = :weekStart', { weekStart: opts!.weekStartDate });
+    }
+    if (weekEnd && !Number.isNaN(weekEnd.getTime())) {
+      qb.andWhere('schedule.weekEndDate = :weekEnd', { weekEnd: opts!.weekEndDate });
+    }
+
+    // Employees: only their own + their department schedules
+    if (!isPrivileged) {
+      qb.leftJoin('team.department', 'department');
+
+      const userId = user?.id;
+      const deptId = user?.departmentId;
+
+      if (userId && deptId) {
+        qb.andWhere('(schedule.teamId = :userId OR team.departmentId = :deptId)', {
+          userId,
+          deptId,
+        });
+      } else if (userId) {
+        qb.andWhere('schedule.teamId = :userId', { userId });
+      } else if (deptId) {
+        qb.andWhere('team.departmentId = :deptId', { deptId });
+      } else {
+        // No identifying info → return nothing
+        qb.andWhere('1=0');
+      }
+    }
+
+    const schedules = await qb.getMany();
+    return schedules.map((s) => this.mapSchedule(s));
   }
 
   async findOne(id: number) {
@@ -103,24 +148,7 @@ export class ScheduleService {
       throw new NotFoundException(`Schedule with ID ${id} not found`);
     }
 
-    return {
-      id: schedule.id,
-      teamId: schedule.teamId,
-      team: schedule.team
-        ? {
-            id: schedule.team.id,
-            name: `${schedule.team.firstName} ${schedule.team.lastName}`,
-            role: schedule.team.role,
-            avatar: schedule.team.profileImage,
-            email: schedule.team.email,
-          }
-        : null,
-      shifts: schedule.shifts,
-      weekStartDate: schedule.weekStartDate,
-      weekEndDate: schedule.weekEndDate,
-      createdAt: schedule.createdAt,
-      updatedAt: schedule.updatedAt,
-    };
+    return this.mapSchedule(schedule);
   }
 
   async update(id: number, updateScheduleDto: UpdateScheduleDto) {

@@ -29,6 +29,33 @@ export class AttendanceService {
       checkOut: attendance.checkOut || '-',
       workHours: attendance.workHours || '-',
       status: attendance.status,
+      approved: attendance.approved,
+      teamId: attendance.teamId,
+      team: attendance.team
+        ? {
+            id: attendance.team.id,
+            name: `${attendance.team.firstName} ${attendance.team.lastName}`,
+            role: attendance.team.role,
+            avatar: attendance.team.profileImage,
+          }
+        : null,
+    }));
+  }
+
+  async findMine(teamId: number) {
+    const attendances = await this.attendanceRepository.find({
+      where: { teamId },
+      relations: ['team'],
+      order: { id: 'ASC' },
+    });
+
+    return attendances.map((attendance) => ({
+      id: attendance.id,
+      checkIn: attendance.checkIn || '-',
+      checkOut: attendance.checkOut || '-',
+      workHours: attendance.workHours || '-',
+      status: attendance.status,
+      approved: attendance.approved,
       teamId: attendance.teamId,
       team: attendance.team
         ? {
@@ -57,6 +84,7 @@ export class AttendanceService {
       checkOut: attendance.checkOut || '-',
       workHours: attendance.workHours || '-',
       status: attendance.status,
+      approved: attendance.approved,
       teamId: attendance.teamId,
       team: attendance.team
         ? {
@@ -105,6 +133,38 @@ export class AttendanceService {
     };
 
     allAttendances.forEach((attendance) => {
+      const status = attendance.status?.toLowerCase();
+      if (status === 'on time') {
+        stats.onTime++;
+      } else if (status === 'late') {
+        stats.late++;
+      } else if (status === 'absent') {
+        stats.absent++;
+      }
+    });
+
+    return {
+      total: stats.total,
+      onTime: stats.onTime,
+      late: stats.late,
+      absent: stats.absent,
+      onTimePercentage: stats.total > 0 ? ((stats.onTime / stats.total) * 100).toFixed(2) : '0.00',
+      latePercentage: stats.total > 0 ? ((stats.late / stats.total) * 100).toFixed(2) : '0.00',
+      absentPercentage: stats.total > 0 ? ((stats.absent / stats.total) * 100).toFixed(2) : '0.00',
+    };
+  }
+
+  async getMyStatusStats(teamId: number) {
+    const myAttendances = await this.attendanceRepository.find({ where: { teamId } });
+
+    const stats = {
+      total: myAttendances.length,
+      onTime: 0,
+      late: 0,
+      absent: 0,
+    };
+
+    myAttendances.forEach((attendance) => {
       const status = attendance.status?.toLowerCase();
       if (status === 'on time') {
         stats.onTime++;

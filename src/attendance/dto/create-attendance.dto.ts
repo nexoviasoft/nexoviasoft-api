@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsBoolean } from 'class-validator';
 
 export class CreateAttendanceDto {
   @IsOptional()
@@ -19,4 +19,8 @@ export class CreateAttendanceDto {
   @IsOptional()
   @IsNumber()
   teamId?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  approved?: boolean;
 }
