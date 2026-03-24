@@ -5,12 +5,14 @@ import { CreateOurTeamDto } from './dto/create-our-team.dto';
 import { UpdateOurTeamDto } from './dto/update-our-team.dto';
 import { OurTeam } from './entities/our-team.entity';
 import * as bcrypt from 'bcrypt';
+import { EmailService } from '../../../common/services/email.service';
 
 @Injectable()
 export class OurTeamService {
   constructor(
     @InjectRepository(OurTeam)
     private readonly ourTeamRepository: Repository<OurTeam>,
+    private readonly emailService: EmailService,
   ) {}
 
   async create(createOurTeamDto: CreateOurTeamDto) {
@@ -26,7 +28,20 @@ export class OurTeamService {
       dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
     } as Partial<OurTeam>);
     
-    return this.ourTeamRepository.save(employee);
+    const savedEmployee = await this.ourTeamRepository.save(employee);
+    
+    if (savedEmployee.email) {
+      this.emailService.sendTeamMemberCredentials(
+        savedEmployee.email,
+        `${savedEmployee.firstName} ${savedEmployee.lastName}`,
+        createOurTeamDto.password,
+        savedEmployee.position || 'Team Member',
+      ).catch(err => {
+        // Error logging is already handled in email service
+      });
+    }
+    
+    return savedEmployee;
   }
 
   findAll() {

@@ -8,6 +8,7 @@ import { getLeaveApprovalTemplate } from '../templates/leave-approval.template';
 import { getLeaveRejectionTemplate } from '../templates/leave-rejection.template';
 import { getDocumentEmailTemplate } from '../templates/document-email.template';
 import { getMeetingInvitationTemplate } from '../templates/meeting-invitation.template';
+import { getTeamMemberCredentialsTemplate } from '../templates/team-member-credentials.template';
 
 @Injectable()
 export class EmailService {
@@ -269,6 +270,36 @@ export class EmailService {
       this.logger.log(`Document email sent to ${to} for ${documentType} ${documentNumber}`);
     } catch (error) {
       this.logger.error(`Failed to send document email to ${to}:`, error);
+      throw error;
+    }
+  }
+
+  async sendTeamMemberCredentials(
+    to: string,
+    memberName: string,
+    passwordPlain: string,
+    position: string,
+  ): Promise<void> {
+    const subject = 'Welcome to SquadLog - Your Login Credentials';
+    const fromEmail = this.smtpConfig.user;
+    const html = getTeamMemberCredentialsTemplate(
+      memberName,
+      to,
+      passwordPlain,
+      position,
+      fromEmail,
+    );
+
+    try {
+      await this.transporter.sendMail({
+        from: fromEmail,
+        to,
+        subject,
+        html,
+      });
+      this.logger.log(`Team member credentials email sent to ${to}`);
+    } catch (error) {
+      this.logger.error(`Failed to send team member credentials email to ${to}:`, error);
       throw error;
     }
   }
