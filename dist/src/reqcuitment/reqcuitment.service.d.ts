@@ -1,0 +1,36 @@
+import { Repository } from 'typeorm';
+import { JobPosting } from './entities/job-posting.entity';
+import { Candidate } from './entities/candidate.entity';
+import { Interview } from './entities/interview.entity';
+import { CreateJobPostingDto } from './dto/create-job-posting.dto';
+import { UpdateJobPostingDto } from './dto/update-job-posting.dto';
+import { CreateCandidateDto } from './dto/create-candidate.dto';
+import { UpdateCandidateDto } from './dto/update-candidate.dto';
+import { CreateInterviewDto } from './dto/create-interview.dto';
+import { UpdateInterviewDto } from './dto/update-interview.dto';
+export declare class ReqcuitmentService {
+    private readonly jobPostingRepository;
+    private readonly candidateRepository;
+    private readonly interviewRepository;
+    constructor(jobPostingRepository: Repository<JobPosting>, candidateRepository: Repository<Candidate>, interviewRepository: Repository<Interview>);
+    createJobPosting(createJobPostingDto: CreateJobPostingDto): Promise<JobPosting>;
+    findAllJobPostings(): Promise<JobPosting[]>;
+    findOneJobPosting(id: number): Promise<JobPosting>;
+    updateJobPosting(id: number, updateJobPostingDto: UpdateJobPostingDto): Promise<JobPosting>;
+    removeJobPosting(id: number): Promise<JobPosting>;
+    createCandidate(createCandidateDto: CreateCandidateDto): Promise<Candidate>;
+    findAllCandidates(): Promise<Candidate[]>;
+    findOneCandidate(id: number): Promise<Candidate>;
+    updateCandidate(id: number, updateCandidateDto: UpdateCandidateDto): Promise<Candidate>;
+    removeCandidate(id: number): Promise<Candidate>;
+    createInterview(createInterviewDto: CreateInterviewDto): Promise<Interview>;
+    findAllInterviews(): Promise<Interview[]>;
+    findOneInterview(id: number): Promise<Interview>;
+    updateInterview(id: number, updateInterviewDto: UpdateInterviewDto): Promise<Interview>;
+    removeInterview(id: number): Promise<Interview>;
+    create(createReqcuitmentDto: any): string;
+    findAll(): string;
+    findOne(id: number): string;
+    update(id: number, updateReqcuitmentDto: any): string;
+    remove(id: number): string;
+}

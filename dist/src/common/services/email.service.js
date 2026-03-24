@@ -1,0 +1,224 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var EmailService_1;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.EmailService = void 0;
+const common_1 = require("@nestjs/common");
+const nodemailer = require("nodemailer");
+const service_request_confirmation_template_1 = require("../templates/service-request-confirmation.template");
+const schedule_assignment_template_1 = require("../templates/schedule-assignment.template");
+const task_assignment_template_1 = require("../templates/task-assignment.template");
+const order_confirmation_template_1 = require("../templates/order-confirmation.template");
+const leave_approval_template_1 = require("../templates/leave-approval.template");
+const leave_rejection_template_1 = require("../templates/leave-rejection.template");
+const document_email_template_1 = require("../templates/document-email.template");
+const meeting_invitation_template_1 = require("../templates/meeting-invitation.template");
+let EmailService = EmailService_1 = class EmailService {
+    constructor() {
+        this.logger = new common_1.Logger(EmailService_1.name);
+        this.smtpConfig = {
+            host: 'smtp.gmail.com',
+            user: 'khataxinfo@gmail.com',
+            password: 'jkqw gwbu ibip zrga',
+        };
+        this.transporter = nodemailer.createTransport({
+            host: this.smtpConfig.host,
+            auth: {
+                user: this.smtpConfig.user,
+                pass: this.smtpConfig.password,
+            },
+        });
+    }
+    async sendServiceRequestConfirmation(to, clientName, serviceType) {
+        const subject = 'Service Request Received - We Will Contact You Soon';
+        const fromEmail = this.smtpConfig.user;
+        const html = (0, service_request_confirmation_template_1.getServiceRequestConfirmationTemplate)(clientName, serviceType, fromEmail);
+        try {
+            await this.transporter.sendMail({
+                from: fromEmail,
+                to,
+                subject,
+                html,
+            });
+            this.logger.log(`Service request confirmation email sent to ${to}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send email to ${to}:`, error);
+            throw error;
+        }
+    }
+    async sendScheduleAssignment(to, teamMemberName, shifts, weekStartDate, weekEndDate) {
+        const subject = 'New Schedule Assignment - SquadLog';
+        const fromEmail = this.smtpConfig.user;
+        const html = (0, schedule_assignment_template_1.getScheduleAssignmentTemplate)(teamMemberName, shifts, fromEmail, weekStartDate, weekEndDate);
+        try {
+            await this.transporter.sendMail({
+                from: fromEmail,
+                to,
+                subject,
+                html,
+            });
+            this.logger.log(`Schedule assignment email sent to ${to}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send schedule assignment email to ${to}:`, error);
+            throw error;
+        }
+    }
+    async sendTaskAssignment(to, teamMemberName, taskTitle, taskDescription, projectName, priority, dueDate, taskUrl) {
+        const subject = `New Task Assignment: ${taskTitle}`;
+        const fromEmail = this.smtpConfig.user;
+        const html = (0, task_assignment_template_1.getTaskAssignmentTemplate)(teamMemberName, taskTitle, taskDescription, projectName, priority, dueDate, fromEmail, taskUrl);
+        try {
+            await this.transporter.sendMail({
+                from: fromEmail,
+                to,
+                subject,
+                html,
+            });
+            this.logger.log(`Task assignment email sent to ${to} for task: ${taskTitle}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send task assignment email to ${to}:`, error);
+            throw error;
+        }
+    }
+    async sendOrderConfirmation(to, clientName, orderId, service, amount, orderDate, orderUrl) {
+        const subject = `Order Confirmation - ${orderId}`;
+        const fromEmail = this.smtpConfig.user;
+        const html = (0, order_confirmation_template_1.getOrderConfirmationTemplate)(clientName, orderId, service, amount, orderDate, fromEmail, orderUrl);
+        try {
+            await this.transporter.sendMail({
+                from: fromEmail,
+                to,
+                subject,
+                html,
+            });
+            this.logger.log(`Order confirmation email sent to ${to} for order: ${orderId}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send order confirmation email to ${to}:`, error);
+            throw error;
+        }
+    }
+    async sendLeaveApproval(to, employeeName, leaveType, startDate, endDate, days, reason) {
+        const subject = 'Leave Request Approved - SquadLog';
+        const fromEmail = this.smtpConfig.user;
+        const html = (0, leave_approval_template_1.getLeaveApprovalTemplate)(employeeName, leaveType, startDate, endDate, days, reason, fromEmail);
+        try {
+            await this.transporter.sendMail({
+                from: fromEmail,
+                to,
+                subject,
+                html,
+            });
+            this.logger.log(`Leave approval email sent to ${to} for ${employeeName}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send leave approval email to ${to}:`, error);
+            throw error;
+        }
+    }
+    async sendLeaveRejection(to, employeeName, leaveType, startDate, endDate, days, reason, rejectionReason) {
+        const subject = 'Leave Request Rejected - SquadLog';
+        const fromEmail = this.smtpConfig.user;
+        const html = (0, leave_rejection_template_1.getLeaveRejectionTemplate)(employeeName, leaveType, startDate, endDate, days, reason, fromEmail, rejectionReason);
+        try {
+            await this.transporter.sendMail({
+                from: fromEmail,
+                to,
+                subject,
+                html,
+            });
+            this.logger.log(`Leave rejection email sent to ${to} for ${employeeName}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send leave rejection email to ${to}:`, error);
+            throw error;
+        }
+    }
+    async sendDocumentEmail(to, clientName, subject, message, pdfHtml, documentType, documentNumber) {
+        const fromEmail = this.smtpConfig.user;
+        const html = (0, document_email_template_1.getDocumentEmailTemplate)(clientName, subject, message, documentType, documentNumber, fromEmail);
+        try {
+            const emailHtml = html + `
+        <div style="margin-top: 30px; padding: 20px; background-color: #f9f9f9; border-radius: 5px;">
+          <h3 style="margin-top: 0;">Document Preview:</h3>
+          <div style="border: 1px solid #ddd; padding: 20px; background-color: white;">
+            ${pdfHtml}
+          </div>
+        </div>
+      `;
+            await this.transporter.sendMail({
+                from: fromEmail,
+                to,
+                subject,
+                html: emailHtml,
+            });
+            this.logger.log(`Document email sent to ${to} for ${documentType} ${documentNumber}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send document email to ${to}:`, error);
+            throw error;
+        }
+    }
+    async sendGenericEmail(to, subject, htmlBody) {
+        const fromEmail = this.smtpConfig.user;
+        const recipients = Array.isArray(to) ? to : [to];
+        try {
+            await this.transporter.sendMail({
+                from: fromEmail,
+                to: recipients.join(', '),
+                subject,
+                html: htmlBody,
+            });
+            this.logger.log(`Generic email sent to ${recipients.join(', ')}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send generic email to ${recipients.join(', ')}:`, error);
+            throw error;
+        }
+    }
+    async sendMeetingInvitations(params) {
+        const subject = `Meeting Invitation: ${params.topic}`;
+        const fromEmail = this.smtpConfig.user;
+        for (const attendee of params.attendees) {
+            const html = (0, meeting_invitation_template_1.getMeetingInvitationTemplate)({
+                attendeeName: attendee.name,
+                topic: params.topic,
+                description: params.description,
+                dateTimeIso: params.dateTimeIso,
+                durationMinutes: params.durationMinutes,
+                meetingLink: params.meetingLink,
+                organizerName: params.organizerName,
+                contactEmail: fromEmail,
+            });
+            try {
+                await this.transporter.sendMail({
+                    from: fromEmail,
+                    to: attendee.email,
+                    subject,
+                    html,
+                });
+                this.logger.log(`Meeting invitation email sent to ${attendee.email}`);
+            }
+            catch (error) {
+                this.logger.error(`Failed to send meeting invitation email to ${attendee.email}:`, error);
+            }
+        }
+    }
+};
+exports.EmailService = EmailService;
+exports.EmailService = EmailService = EmailService_1 = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [])
+], EmailService);
+//# sourceMappingURL=email.service.js.map
