@@ -1,9 +1,9 @@
 export function getServiceRequestConfirmationTemplate(
-  clientName: string,
-  serviceType: string,
-  contactEmail: string,
+    clientName: string,
+    serviceType: string,
+    contactEmail: string,
 ): string {
-  return `
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -107,12 +107,12 @@ export function getServiceRequestConfirmationTemplate(
             <p>We are committed to providing you with the best service and will ensure all your requirements are met.</p>
             
             <p>Best regards,<br>
-            <strong>SquadLog Team</strong></p>
+            <strong>NexoviaSoft Team</strong></p>
         </div>
         
         <div class="footer">
             <p>This is an automated confirmation email. Please do not reply to this message.</p>
-            <p>&copy; ${new Date().getFullYear()} SquadLog. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} NexoviaSoft. All rights reserved.</p>
         </div>
     </div>
 </body>

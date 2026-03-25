@@ -1,11 +1,11 @@
 export function getTeamMemberCredentialsTemplate(
-  memberName: string,
-  email: string,
-  passwordPlain: string,
-  position: string,
-  contactEmail: string,
+    memberName: string,
+    email: string,
+    passwordPlain: string,
+    position: string,
+    contactEmail: string,
 ): string {
-  return `
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -101,7 +101,7 @@ export function getTeamMemberCredentialsTemplate(
 <body>
     <div class="container">
         <div class="header">
-            <h1>Welcome to SquadLog!</h1>
+            <h1>Welcome to NexoviaSoft!</h1>
         </div>
         
         <div class="content">
@@ -133,12 +133,12 @@ export function getTeamMemberCredentialsTemplate(
             </div>
             
             <p>Best regards,<br>
-            <strong>SquadLog Team</strong></p>
+            <strong>NexoviaSoft Team</strong></p>
         </div>
         
         <div class="footer">
             <p>This is an automated notification email. Please do not reply to this message.</p>
-            <p>&copy; ${new Date().getFullYear()} SquadLog. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} NexoviaSoft. All rights reserved.</p>
         </div>
     </div>
 </body>

@@ -1,17 +1,17 @@
 export function getScheduleAssignmentTemplate(
-  teamMemberName: string,
-  shifts: Array<{ time?: string; label?: string; type?: string } | null>,
-  contactEmail: string,
-  weekStartDate?: string,
-  weekEndDate?: string,
+    teamMemberName: string,
+    shifts: Array<{ time?: string; label?: string; type?: string } | null>,
+    contactEmail: string,
+    weekStartDate?: string,
+    weekEndDate?: string,
 ): string {
-  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  
-  const shiftsList = shifts.map((shift, index) => {
-    if (!shift) {
-      return `<tr><td><strong>${daysOfWeek[index]}</strong></td><td>No shift assigned</td></tr>`;
-    }
-    return `
+    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+    const shiftsList = shifts.map((shift, index) => {
+        if (!shift) {
+            return `<tr><td><strong>${daysOfWeek[index]}</strong></td><td>No shift assigned</td></tr>`;
+        }
+        return `
       <tr>
         <td><strong>${daysOfWeek[index]}</strong></td>
         <td>
@@ -23,13 +23,13 @@ export function getScheduleAssignmentTemplate(
         </td>
       </tr>
     `;
-  }).join('');
+    }).join('');
 
-  const weekInfo = weekStartDate && weekEndDate 
-    ? `<p><strong>Week:</strong> ${new Date(weekStartDate).toLocaleDateString()} - ${new Date(weekEndDate).toLocaleDateString()}</p>`
-    : '';
+    const weekInfo = weekStartDate && weekEndDate
+        ? `<p><strong>Week:</strong> ${new Date(weekStartDate).toLocaleDateString()} - ${new Date(weekEndDate).toLocaleDateString()}</p>`
+        : '';
 
-  return `
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -141,12 +141,12 @@ export function getScheduleAssignmentTemplate(
             </div>
             
             <p>Best regards,<br>
-            <strong>SquadLog Team</strong></p>
+            <strong>NexoviaSoft Team</strong></p>
         </div>
         
         <div class="footer">
             <p>This is an automated notification email. Please do not reply to this message.</p>
-            <p>&copy; ${new Date().getFullYear()} SquadLog. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} NexoviaSoft. All rights reserved.</p>
         </div>
     </div>
 </body>

@@ -1,14 +1,14 @@
 export function getDocumentEmailTemplate(
-  clientName: string,
-  subject: string,
-  message: string,
-  documentType: string,
-  documentNumber: string,
-  contactEmail: string,
+    clientName: string,
+    subject: string,
+    message: string,
+    documentType: string,
+    documentNumber: string,
+    contactEmail: string,
 ): string {
-  const documentTypeLabel = documentType === 'invoice' ? 'Invoice' : 'Official Letter';
+    const documentTypeLabel = documentType === 'invoice' ? 'Invoice' : 'Official Letter';
 
-  return `
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -106,13 +106,13 @@ export function getDocumentEmailTemplate(
             <p>If you have any questions or need clarification, please don't hesitate to contact us.</p>
             
             <p>Best regards,<br>
-            <strong>SquadLog Team</strong></p>
+            <strong>NexoviaSoft Team</strong></p>
         </div>
         
         <div class="footer">
             <p>This is an automated email. Please do not reply to this message.</p>
             <p>For inquiries, contact: ${contactEmail}</p>
-            <p>&copy; ${new Date().getFullYear()} SquadLog. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} NexoviaSoft. All rights reserved.</p>
         </div>
     </div>
 </body>

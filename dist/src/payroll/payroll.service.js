@@ -129,9 +129,9 @@ let PayrollService = class PayrollService {
         <p>Your salary has been marked as <b>Paid</b> for <b>${period}</b>.</p>
         <p><b>Net Pay:</b> $${amount}</p>
         ${loaded.paymentDate
-            ? `<p><b>Payment Date:</b> ${new Date(loaded.paymentDate).toDateString()}</p>`
-            : ''}
-        <p style="margin-top: 18px;">Thanks,<br/>SquadLog</p>
+                ? `<p><b>Payment Date:</b> ${new Date(loaded.paymentDate).toDateString()}</p>`
+                : ''}
+        <p style="margin-top: 18px;">Thanks,<br/>NexoviaSoft</p>
       </div>
     `;
         await this.emailService.sendGenericEmail(team.email, subject, htmlBody);
@@ -143,7 +143,7 @@ exports.PayrollService = PayrollService = __decorate([
     __param(0, (0, typeorm_1.InjectRepository)(payroll_entity_1.Payroll)),
     __param(1, (0, typeorm_1.InjectRepository)(our_team_entity_1.OurTeam)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        typeorm_2.Repository,
-        email_service_1.EmailService])
+    typeorm_2.Repository,
+    email_service_1.EmailService])
 ], PayrollService);
 //# sourceMappingURL=payroll.service.js.map

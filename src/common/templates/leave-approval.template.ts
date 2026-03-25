@@ -1,24 +1,24 @@
 export function getLeaveApprovalTemplate(
-  employeeName: string,
-  leaveType: string,
-  startDate: string,
-  endDate: string,
-  days: number,
-  reason: string | null,
-  contactEmail: string,
+    employeeName: string,
+    leaveType: string,
+    startDate: string,
+    endDate: string,
+    days: number,
+    reason: string | null,
+    contactEmail: string,
 ): string {
-  const startDateFormatted = new Date(startDate).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-  const endDateFormatted = new Date(endDate).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+    const startDateFormatted = new Date(startDate).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
+    const endDateFormatted = new Date(endDate).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
 
-  return `
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -177,12 +177,12 @@ export function getLeaveApprovalTemplate(
             </div>
             
             <p>Best regards,<br>
-            <strong>SquadLog Team</strong></p>
+            <strong>NexoviaSoft Team</strong></p>
         </div>
         
         <div class="footer">
             <p>This is an automated notification email. Please do not reply to this message.</p>
-            <p>&copy; ${new Date().getFullYear()} SquadLog. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} NexoviaSoft. All rights reserved.</p>
         </div>
     </div>
 </body>

@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getMeetingInvitationTemplate = getMeetingInvitationTemplate;
 function getMeetingInvitationTemplate(params) {
-    const dt = new Date(params.dateTimeIso);
-    const when = Number.isNaN(dt.getTime()) ? params.dateTimeIso : dt.toLocaleString();
-    return `
+  const dt = new Date(params.dateTimeIso);
+  const when = Number.isNaN(dt.getTime()) ? params.dateTimeIso : dt.toLocaleString();
+  return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -40,7 +40,7 @@ function getMeetingInvitationTemplate(params) {
     <p class="mono">${params.meetingLink}</p>
 
     <div class="footer">
-      <p>This is an automated invitation from SquadLog.</p>
+      <p>This is an automated invitation from NexoviaSoft.</p>
       <p>Need help? Contact us at ${params.contactEmail}</p>
     </div>
   </div>

@@ -20,7 +20,7 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
-            secretOrKey: configService.get('JWT_SECRET') || 'squadlog-jwt-secret-change-in-production',
+            secretOrKey: configService.get('JWT_SECRET') || 'NexoviaSoft-jwt-secret-change-in-production',
         });
         this.configService = configService;
         this.authService = authService;
@@ -38,6 +38,6 @@ exports.JwtStrategy = JwtStrategy;
 exports.JwtStrategy = JwtStrategy = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [config_1.ConfigService,
-        auth_service_1.AuthService])
+    auth_service_1.AuthService])
 ], JwtStrategy);
 //# sourceMappingURL=jwt.strategy.js.map

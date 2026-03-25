@@ -15,7 +15,7 @@ export class PayrollService {
     @InjectRepository(OurTeam)
     private readonly ourTeamRepository: Repository<OurTeam>,
     private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
   private computeNetPay(baseSalary = 0, bonus = 0, deductions = 0) {
     const net = Number(baseSalary) + Number(bonus) - Number(deductions);
@@ -166,12 +166,11 @@ export class PayrollService {
         <p>Hi ${name},</p>
         <p>Your salary has been marked as <b>Paid</b> for <b>${period}</b>.</p>
         <p><b>Net Pay:</b> $${amount}</p>
-        ${
-          loaded.paymentDate
-            ? `<p><b>Payment Date:</b> ${new Date(loaded.paymentDate).toDateString()}</p>`
-            : ''
-        }
-        <p style="margin-top: 18px;">Thanks,<br/>SquadLog</p>
+        ${loaded.paymentDate
+        ? `<p><b>Payment Date:</b> ${new Date(loaded.paymentDate).toDateString()}</p>`
+        : ''
+      }
+        <p style="margin-top: 18px;">Thanks,<br/>NexoviaSoft</p>
       </div>
     `;
 

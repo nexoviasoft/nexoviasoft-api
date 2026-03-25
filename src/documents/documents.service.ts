@@ -14,13 +14,13 @@ export class DocumentsService {
     @InjectRepository(Document)
     private documentRepository: Repository<Document>,
     private emailService: EmailService,
-  ) {}
+  ) { }
 
   async create(createDocumentDto: CreateDocumentDto): Promise<Document> {
     try {
       this.logger.log(`Creating document with type: ${createDocumentDto.type}`);
       this.logger.log(`Document data: ${JSON.stringify(createDocumentDto, null, 2)}`);
-      
+
       // Ensure data is a valid object
       if (!createDocumentDto.data || typeof createDocumentDto.data !== 'object') {
         throw new Error('Document data must be a valid object');
@@ -50,10 +50,10 @@ export class DocumentsService {
 
       const document = this.documentRepository.create(cleanedDto);
       const savedDocument = await this.documentRepository.save(document);
-      
+
       // TypeORM save() can return Document | Document[], but when saving a single entity it returns Document
       const result = Array.isArray(savedDocument) ? savedDocument[0] : savedDocument;
-      
+
       this.logger.log(`Document created successfully with ID: ${result.id}`);
       return result;
     } catch (error) {
@@ -147,7 +147,7 @@ export class DocumentsService {
     if (document.type === 'invoice') {
       return `Dear ${document.clientName || 'Valued Client'},\n\nPlease find attached your invoice.\n\nThank you for your business.`;
     } else if (document.type === 'letter') {
-      return `Dear ${document.clientName || 'Recipient'},\n\nPlease find attached the official letter.\n\nBest regards,\nSquadLog Team`;
+      return `Dear ${document.clientName || 'Recipient'},\n\nPlease find attached the official letter.\n\nBest regards,\nNexoviaSoft Team`;
     }
     return `Please find attached the requested document.`;
   }
@@ -279,8 +279,8 @@ export class DocumentsService {
       </head>
       <body>
         <div class="header">
-          <div class="company-name">SQUADLOG INC.</div>
-          <div style="font-size: 12px; color: #666;">123 Tech Park • San Francisco, CA • www.squadlog.com</div>
+          <div class="company-name">NexoviaSoft INC.</div>
+          <div style="font-size: 12px; color: #666;">123 Tech Park • San Francisco, CA • www.NexoviaSoft.com</div>
         </div>
         
         <div class="date">${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
@@ -298,24 +298,24 @@ export class DocumentsService {
           <p>Dear <strong>${data.candidateName || '[Candidate Name]'}</strong>,</p>
           
           ${template === 'offer-letter' ? `
-            <p>We are pleased to extend an offer for you to join <strong>SquadLog Inc.</strong> in the position of <strong>${data.role || '[Role]'}</strong>. 
+            <p>We are pleased to extend an offer for you to join <strong>NexoviaSoft Inc.</strong> in the position of <strong>${data.role || '[Role]'}</strong>. 
             We were impressed with your skills and experience and believe you will be a valuable asset to our team.</p>
             <p>Your starting annual salary will be <strong>${data.salary || '[Salary]'}</strong>, along with our standard benefits package. 
             You will be reporting to <strong>${data.manager || '[Manager Name]'}</strong>.</p>
           ` : template === 'appointment-letter' ? `
-            <p>Further to our recent discussions and your acceptance of our offer, we are delighted to confirm your appointment as <strong>${data.role || '[Role]'}</strong> at <strong>SquadLog Inc.</strong>, effective from <strong>${data.startDate}</strong>.</p>
+            <p>Further to our recent discussions and your acceptance of our offer, we are delighted to confirm your appointment as <strong>${data.role || '[Role]'}</strong> at <strong>NexoviaSoft Inc.</strong>, effective from <strong>${data.startDate}</strong>.</p>
             <p>Your annual compensation package is fixed at <strong>${data.salary || '[Salary]'}</strong>. 
             The terms and conditions of your employment are outlined in the attached Employee Handbook.</p>
           ` : '<p>Official letter content...</p>'}
           
-          <p>We look forward to welcoming you to the SquadLog family. Please sign and return a copy of this letter to acknowledge your acceptance.</p>
+          <p>We look forward to welcoming you to the NexoviaSoft family. Please sign and return a copy of this letter to acknowledge your acceptance.</p>
         </div>
         
         <div class="signatures">
           <div>
             <div class="signature-line">
               <strong>Authorized Signatory</strong><br/>
-              SquadLog Inc.
+              NexoviaSoft Inc.
             </div>
           </div>
           <div>

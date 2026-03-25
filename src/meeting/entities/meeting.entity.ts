@@ -15,7 +15,7 @@ export class Meeting {
   meetingId: string; // e.g. m-2026-01-29-002
 
   @Column()
-  meetingLink: string; // https://squadlog.com/meetings/<meetingId>
+  meetingLink: string; // https://NexoviaSoft.com/meetings/<meetingId>
 
   @Column()
   topic: string;

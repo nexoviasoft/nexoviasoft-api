@@ -1,27 +1,27 @@
 export function getTaskAssignmentTemplate(
-  teamMemberName: string,
-  taskTitle: string,
-  taskDescription: string,
-  projectName: string,
-  priority: string,
-  dueDate: string | null,
-  contactEmail: string,
-  taskUrl?: string,
+    teamMemberName: string,
+    taskTitle: string,
+    taskDescription: string,
+    projectName: string,
+    priority: string,
+    dueDate: string | null,
+    contactEmail: string,
+    taskUrl?: string,
 ): string {
-  const priorityColors: { [key: string]: { bg: string; border: string; text: string } } = {
-    high: { bg: '#ffebee', border: '#f44336', text: '#c62828' },
-    medium: { bg: '#fff3e0', border: '#ff9800', text: '#e65100' },
-    low: { bg: '#e8f5e9', border: '#4caf50', text: '#2e7d32' },
-  };
+    const priorityColors: { [key: string]: { bg: string; border: string; text: string } } = {
+        high: { bg: '#ffebee', border: '#f44336', text: '#c62828' },
+        medium: { bg: '#fff3e0', border: '#ff9800', text: '#e65100' },
+        low: { bg: '#e8f5e9', border: '#4caf50', text: '#2e7d32' },
+    };
 
-  const priorityStyle = priorityColors[priority.toLowerCase()] || priorityColors.medium;
-  const dueDateText = dueDate ? new Date(dueDate).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }) : 'Not set';
+    const priorityStyle = priorityColors[priority.toLowerCase()] || priorityColors.medium;
+    const dueDateText = dueDate ? new Date(dueDate).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    }) : 'Not set';
 
-  return `
+    return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -183,12 +183,12 @@ export function getTaskAssignmentTemplate(
             </div>
             
             <p>Best regards,<br>
-            <strong>SquadLog Team</strong></p>
+            <strong>NexoviaSoft Team</strong></p>
         </div>
         
         <div class="footer">
             <p>This is an automated notification email. Please do not reply to this message.</p>
-            <p>&copy; ${new Date().getFullYear()} SquadLog. All rights reserved.</p>
+            <p>&copy; ${new Date().getFullYear()} NexoviaSoft. All rights reserved.</p>
         </div>
     </div>
 </body>

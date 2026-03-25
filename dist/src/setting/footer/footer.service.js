@@ -28,7 +28,7 @@ let FooterService = class FooterService {
         });
         if (!footer) {
             const defaultFooter = this.footerRepository.create({
-                company_name: 'SquadLog.',
+                company_name: 'NexoviaSoft.',
                 company_description: 'Crafting digital experiences with precision and passion. Based remotely, working globally.',
                 location: 'New York, NY',
                 company_links_title: 'Company',

@@ -17,7 +17,7 @@ import { OurTeamModule } from '../setting/home/our-team/our-team.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || 'squadlog-jwt-secret-change-in-production',
+        secret: configService.get<string>('JWT_SECRET') || 'NexoviaSoft-jwt-secret-change-in-production',
         signOptions: {
           expiresIn: '24h',
         },
@@ -30,4 +30,4 @@ import { OurTeamModule } from '../setting/home/our-team/our-team.module';
   providers: [AuthService, LocalStrategy, JwtStrategy],
   exports: [AuthService],
 })
-export class AuthModule {}
+export class AuthModule { }

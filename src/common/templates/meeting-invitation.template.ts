@@ -47,7 +47,7 @@ export function getMeetingInvitationTemplate(params: {
     <p class="mono">${params.meetingLink}</p>
 
     <div class="footer">
-      <p>This is an automated invitation from SquadLog.</p>
+      <p>This is an automated invitation from NexoviaSoft.</p>
       <p>Need help? Contact us at ${params.contactEmail}</p>
     </div>
   </div>

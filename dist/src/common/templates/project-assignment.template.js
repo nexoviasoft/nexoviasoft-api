@@ -2,13 +2,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getProjectAssignmentTemplate = void 0;
 const getProjectAssignmentTemplate = (teamMemberName, projectName, projectRole, contactEmail) => {
-    return `
+  return `
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Project Assignment - SquadLog</title>
+  <title>Project Assignment - NexoviaSoft</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -115,7 +115,7 @@ const getProjectAssignmentTemplate = (teamMemberName, projectName, projectRole, 
       </div>
       
       <div class="message">
-        You have been assigned to a new project on SquadLog. Here are the details of your assignment:
+        You have been assigned to a new project on NexoviaSoft. Here are the details of your assignment:
       </div>
       
       <div class="details-box">
@@ -130,18 +130,18 @@ const getProjectAssignmentTemplate = (teamMemberName, projectName, projectRole, 
       </div>
       
       <div class="message">
-        Please log in to your SquadLog portal to review the project details and any associated tasks.
+        Please log in to your NexoviaSoft portal to review the project details and any associated tasks.
       </div>
       
       <div style="text-align: center;">
         <!-- You could dynamically pass a frontend URL here if needed -->
-        <a href="#" class="action-button">Log in to SquadLog</a>
+        <a href="#" class="action-button">Log in to NexoviaSoft</a>
       </div>
     </div>
     
     <div class="footer">
       <p>If you have any questions, please contact your manager or email us at <a href="mailto:${contactEmail}" class="contact">${contactEmail}</a>.</p>
-      <p style="margin-top: 10px;">Best regards,<br>The SquadLog Team</p>
+      <p style="margin-top: 10px;">Best regards,<br>The NexoviaSoft Team</p>
     </div>
   </div>
 </body>

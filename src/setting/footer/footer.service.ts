@@ -9,7 +9,7 @@ export class FooterService {
   constructor(
     @InjectRepository(Footer)
     private readonly footerRepository: Repository<Footer>,
-  ) {}
+  ) { }
 
   async getOne() {
     // Get the first footer record (there should only be one)
@@ -21,7 +21,7 @@ export class FooterService {
     if (!footer) {
       // If no footer exists, create a default one
       const defaultFooter = this.footerRepository.create({
-        company_name: 'SquadLog.',
+        company_name: 'NexoviaSoft.',
         company_description:
           'Crafting digital experiences with precision and passion. Based remotely, working globally.',
         location: 'New York, NY',
