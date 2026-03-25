@@ -6,6 +6,7 @@ import { EmailService } from '../../../common/services/email.service';
 export declare class OurTeamService {
     private readonly ourTeamRepository;
     private readonly emailService;
+    private readonly logger;
     constructor(ourTeamRepository: Repository<OurTeam>, emailService: EmailService);
     create(createOurTeamDto: CreateOurTeamDto): Promise<OurTeam>;
     findAll(): Promise<OurTeam[]>;

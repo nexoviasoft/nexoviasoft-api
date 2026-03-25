@@ -1,18 +1,18 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function (o, m, k, k2) {
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
     if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-        desc = { enumerable: true, get: function () { return m[k]; } };
+      desc = { enumerable: true, get: function() { return m[k]; } };
     }
     Object.defineProperty(o, k2, desc);
-}) : (function (o, m, k, k2) {
+}) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
 }));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function (o, v) {
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
     Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function (o, v) {
+}) : function(o, v) {
     o["default"] = v;
 });
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
@@ -22,7 +22,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function (o) {
+    var ownKeys = function(o) {
         ownKeys = Object.getOwnPropertyNames || function (o) {
             var ar = [];
             for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
@@ -60,21 +60,30 @@ let EmailService = EmailService_1 = class EmailService {
     constructor() {
         this.logger = new common_1.Logger(EmailService_1.name);
         this.smtpConfig = {
-            host: 'smtp.gmail.com',
-            user: 'innowavesolutioninfo@gmail.com',
-            password: 'eydh kgcs wplp avzv',
+            host: process.env.SMTP_HOST || 'smtp.gmail.com',
+            port: Number(process.env.SMTP_PORT || 587),
+            secure: process.env.SMTP_SECURE === 'true',
+            user: process.env.SMTP_USER || 'innowavesolutioninfo@gmail.com',
+            password: process.env.SMTP_PASS || 'eydh kgcs wplp avzv',
+            from: process.env.SMTP_FROM,
         };
         this.transporter = nodemailer.createTransport({
             host: this.smtpConfig.host,
+            port: this.smtpConfig.port,
+            secure: this.smtpConfig.secure,
             auth: {
                 user: this.smtpConfig.user,
                 pass: this.smtpConfig.password,
             },
         });
+        this.transporter
+            .verify()
+            .then(() => this.logger.log('SMTP connection verified'))
+            .catch((error) => this.logger.error('SMTP verification failed. Check SMTP_* environment variables.', error));
     }
     async sendServiceRequestConfirmation(to, clientName, serviceType) {
         const subject = 'Service Request Received - We Will Contact You Soon';
-        const fromEmail = this.smtpConfig.user;
+        const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
         const html = (0, service_request_confirmation_template_1.getServiceRequestConfirmationTemplate)(clientName, serviceType, fromEmail);
         try {
             await this.transporter.sendMail({
@@ -92,7 +101,7 @@ let EmailService = EmailService_1 = class EmailService {
     }
     async sendScheduleAssignment(to, teamMemberName, shifts, weekStartDate, weekEndDate) {
         const subject = 'New Schedule Assignment - NexoviaSoft';
-        const fromEmail = this.smtpConfig.user;
+        const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
         const html = (0, schedule_assignment_template_1.getScheduleAssignmentTemplate)(teamMemberName, shifts, fromEmail, weekStartDate, weekEndDate);
         try {
             await this.transporter.sendMail({
@@ -110,7 +119,7 @@ let EmailService = EmailService_1 = class EmailService {
     }
     async sendTaskAssignment(to, teamMemberName, taskTitle, taskDescription, projectName, priority, dueDate, taskUrl) {
         const subject = `New Task Assignment: ${taskTitle}`;
-        const fromEmail = this.smtpConfig.user;
+        const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
         const html = (0, task_assignment_template_1.getTaskAssignmentTemplate)(teamMemberName, taskTitle, taskDescription, projectName, priority, dueDate, fromEmail, taskUrl);
         try {
             await this.transporter.sendMail({
@@ -128,7 +137,7 @@ let EmailService = EmailService_1 = class EmailService {
     }
     async sendOrderConfirmation(to, clientName, orderId, service, amount, orderDate, orderUrl) {
         const subject = `Order Confirmation - ${orderId}`;
-        const fromEmail = this.smtpConfig.user;
+        const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
         const html = (0, order_confirmation_template_1.getOrderConfirmationTemplate)(clientName, orderId, service, amount, orderDate, fromEmail, orderUrl);
         try {
             await this.transporter.sendMail({
@@ -146,7 +155,7 @@ let EmailService = EmailService_1 = class EmailService {
     }
     async sendLeaveApproval(to, employeeName, leaveType, startDate, endDate, days, reason) {
         const subject = 'Leave Request Approved - NexoviaSoft';
-        const fromEmail = this.smtpConfig.user;
+        const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
         const html = (0, leave_approval_template_1.getLeaveApprovalTemplate)(employeeName, leaveType, startDate, endDate, days, reason, fromEmail);
         try {
             await this.transporter.sendMail({
@@ -164,7 +173,7 @@ let EmailService = EmailService_1 = class EmailService {
     }
     async sendLeaveRejection(to, employeeName, leaveType, startDate, endDate, days, reason, rejectionReason) {
         const subject = 'Leave Request Rejected - NexoviaSoft';
-        const fromEmail = this.smtpConfig.user;
+        const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
         const html = (0, leave_rejection_template_1.getLeaveRejectionTemplate)(employeeName, leaveType, startDate, endDate, days, reason, fromEmail, rejectionReason);
         try {
             await this.transporter.sendMail({
@@ -181,7 +190,7 @@ let EmailService = EmailService_1 = class EmailService {
         }
     }
     async sendDocumentEmail(to, clientName, subject, message, pdfHtml, documentType, documentNumber) {
-        const fromEmail = this.smtpConfig.user;
+        const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
         const html = (0, document_email_template_1.getDocumentEmailTemplate)(clientName, subject, message, documentType, documentNumber, fromEmail);
         try {
             const emailHtml = html + `
@@ -207,7 +216,7 @@ let EmailService = EmailService_1 = class EmailService {
     }
     async sendTeamMemberCredentials(to, memberName, passwordPlain, position) {
         const subject = 'Welcome to NexoviaSoft - Your Login Credentials';
-        const fromEmail = this.smtpConfig.user;
+        const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
         const html = (0, team_member_credentials_template_1.getTeamMemberCredentialsTemplate)(memberName, to, passwordPlain, position, fromEmail);
         try {
             await this.transporter.sendMail({
@@ -225,7 +234,7 @@ let EmailService = EmailService_1 = class EmailService {
     }
     async sendProjectAssignment(to, memberName, projectName, projectRole) {
         const subject = `New Project Assignment: ${projectName}`;
-        const fromEmail = this.smtpConfig.user;
+        const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
         const html = (0, project_assignment_template_1.getProjectAssignmentTemplate)(memberName, projectName, projectRole, fromEmail);
         try {
             await this.transporter.sendMail({
@@ -242,7 +251,7 @@ let EmailService = EmailService_1 = class EmailService {
         }
     }
     async sendGenericEmail(to, subject, htmlBody) {
-        const fromEmail = this.smtpConfig.user;
+        const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
         const recipients = Array.isArray(to) ? to : [to];
         try {
             await this.transporter.sendMail({
@@ -260,7 +269,7 @@ let EmailService = EmailService_1 = class EmailService {
     }
     async sendMeetingInvitations(params) {
         const subject = `Meeting Invitation: ${params.topic}`;
-        const fromEmail = this.smtpConfig.user;
+        const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
         for (const attendee of params.attendees) {
             const html = (0, meeting_invitation_template_1.getMeetingInvitationTemplate)({
                 attendeeName: attendee.name,

@@ -17,18 +17,29 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
   private readonly smtpConfig = {
     host: 'smtp.gmail.com',
-    user: 'innowavesolutioninfo@gmail.com',
-    password: 'eydh kgcs wplp avzv',
+    user: 'nexoviasoft@gmail.com',
+    password: 'ofjw yqfx pllm hzpk',
+    from: process.env.SMTP_FROM,
   };
 
   constructor() {
     this.transporter = nodemailer.createTransport({
       host: this.smtpConfig.host,
+
+    
       auth: {
         user: this.smtpConfig.user,
         pass: this.smtpConfig.password,
       },
     });
+
+    // Surface SMTP misconfiguration early instead of failing silently on first send.
+    this.transporter
+      .verify()
+      .then(() => this.logger.log('SMTP connection verified'))
+      .catch((error) =>
+        this.logger.error('SMTP verification failed. Check SMTP_* environment variables.', error),
+      );
   }
 
   async sendServiceRequestConfirmation(
@@ -37,7 +48,7 @@ export class EmailService {
     serviceType: string,
   ): Promise<void> {
     const subject = 'Service Request Received - We Will Contact You Soon';
-    const fromEmail = this.smtpConfig.user;
+    const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
     const html = getServiceRequestConfirmationTemplate(clientName, serviceType, fromEmail);
 
     try {
@@ -61,8 +72,8 @@ export class EmailService {
     weekStartDate?: string,
     weekEndDate?: string,
   ): Promise<void> {
-    const subject = 'New Schedule Assignment - SquadLog';
-    const fromEmail = this.smtpConfig.user;
+    const subject = 'New Schedule Assignment - NexoviaSoft';
+    const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
     const html = getScheduleAssignmentTemplate(
       teamMemberName,
       shifts,
@@ -96,7 +107,7 @@ export class EmailService {
     taskUrl?: string,
   ): Promise<void> {
     const subject = `New Task Assignment: ${taskTitle}`;
-    const fromEmail = this.smtpConfig.user;
+    const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
     const html = getTaskAssignmentTemplate(
       teamMemberName,
       taskTitle,
@@ -132,7 +143,7 @@ export class EmailService {
     orderUrl?: string,
   ): Promise<void> {
     const subject = `Order Confirmation - ${orderId}`;
-    const fromEmail = this.smtpConfig.user;
+    const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
     const html = getOrderConfirmationTemplate(
       clientName,
       orderId,
@@ -166,8 +177,8 @@ export class EmailService {
     days: number,
     reason: string | null,
   ): Promise<void> {
-    const subject = 'Leave Request Approved - SquadLog';
-    const fromEmail = this.smtpConfig.user;
+    const subject = 'Leave Request Approved - NexoviaSoft';
+    const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
     const html = getLeaveApprovalTemplate(
       employeeName,
       leaveType,
@@ -202,8 +213,8 @@ export class EmailService {
     reason: string | null,
     rejectionReason?: string,
   ): Promise<void> {
-    const subject = 'Leave Request Rejected - SquadLog';
-    const fromEmail = this.smtpConfig.user;
+    const subject = 'Leave Request Rejected - NexoviaSoft';
+    const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
     const html = getLeaveRejectionTemplate(
       employeeName,
       leaveType,
@@ -238,7 +249,7 @@ export class EmailService {
     documentType: string,
     documentNumber: string,
   ): Promise<void> {
-    const fromEmail = this.smtpConfig.user;
+    const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
     const html = getDocumentEmailTemplate(
       clientName,
       subject,
@@ -281,8 +292,8 @@ export class EmailService {
     passwordPlain: string,
     position: string,
   ): Promise<void> {
-    const subject = 'Welcome to SquadLog - Your Login Credentials';
-    const fromEmail = this.smtpConfig.user;
+    const subject = 'Welcome to NexoviaSoft - Your Login Credentials';
+    const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
     const html = getTeamMemberCredentialsTemplate(
       memberName,
       to,
@@ -312,7 +323,7 @@ export class EmailService {
     projectRole: string,
   ): Promise<void> {
     const subject = `New Project Assignment: ${projectName}`;
-    const fromEmail = this.smtpConfig.user;
+    const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
     const html = getProjectAssignmentTemplate(
       memberName,
       projectName,
@@ -339,7 +350,7 @@ export class EmailService {
     subject: string,
     htmlBody: string,
   ): Promise<void> {
-    const fromEmail = this.smtpConfig.user;
+    const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
     const recipients = Array.isArray(to) ? to : [to];
 
     try {
@@ -367,7 +378,7 @@ export class EmailService {
     organizerName?: string | null;
   }): Promise<void> {
     const subject = `Meeting Invitation: ${params.topic}`;
-    const fromEmail = this.smtpConfig.user;
+    const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
 
     // Send individually so each recipient sees their own name.
     for (const attendee of params.attendees) {

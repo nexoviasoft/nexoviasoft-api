@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateOurTeamDto } from './dto/create-our-team.dto';
@@ -9,6 +9,8 @@ import { EmailService } from '../../../common/services/email.service';
 
 @Injectable()
 export class OurTeamService {
+  private readonly logger = new Logger(OurTeamService.name);
+
   constructor(
     @InjectRepository(OurTeam)
     private readonly ourTeamRepository: Repository<OurTeam>,
@@ -31,14 +33,19 @@ export class OurTeamService {
     const savedEmployee = await this.ourTeamRepository.save(employee);
     
     if (savedEmployee.email) {
-      this.emailService.sendTeamMemberCredentials(
-        savedEmployee.email,
-        `${savedEmployee.firstName} ${savedEmployee.lastName}`,
-        createOurTeamDto.password,
-        savedEmployee.position || 'Team Member',
-      ).catch(err => {
-        // Error logging is already handled in email service
-      });
+      this.emailService
+        .sendTeamMemberCredentials(
+          savedEmployee.email,
+          `${savedEmployee.firstName} ${savedEmployee.lastName}`,
+          createOurTeamDto.password,
+          savedEmployee.position || 'Team Member',
+        )
+        .catch((err) => {
+          this.logger.error(
+            `Team member created but credentials email failed for ${savedEmployee.email}`,
+            err?.stack || String(err),
+          );
+        });
     }
     
     return savedEmployee;

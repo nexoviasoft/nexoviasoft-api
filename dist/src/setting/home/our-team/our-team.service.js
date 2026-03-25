@@ -44,6 +44,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var OurTeamService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OurTeamService = void 0;
 const common_1 = require("@nestjs/common");
@@ -52,10 +53,11 @@ const typeorm_2 = require("typeorm");
 const our_team_entity_1 = require("./entities/our-team.entity");
 const bcrypt = __importStar(require("bcrypt"));
 const email_service_1 = require("../../../common/services/email.service");
-let OurTeamService = class OurTeamService {
+let OurTeamService = OurTeamService_1 = class OurTeamService {
     constructor(ourTeamRepository, emailService) {
         this.ourTeamRepository = ourTeamRepository;
         this.emailService = emailService;
+        this.logger = new common_1.Logger(OurTeamService_1.name);
     }
     async create(createOurTeamDto) {
         const hashedPassword = await bcrypt.hash(createOurTeamDto.password, 10);
@@ -68,7 +70,10 @@ let OurTeamService = class OurTeamService {
         });
         const savedEmployee = await this.ourTeamRepository.save(employee);
         if (savedEmployee.email) {
-            this.emailService.sendTeamMemberCredentials(savedEmployee.email, `${savedEmployee.firstName} ${savedEmployee.lastName}`, createOurTeamDto.password, savedEmployee.position || 'Team Member').catch(err => {
+            this.emailService
+                .sendTeamMemberCredentials(savedEmployee.email, `${savedEmployee.firstName} ${savedEmployee.lastName}`, createOurTeamDto.password, savedEmployee.position || 'Team Member')
+                .catch((err) => {
+                this.logger.error(`Team member created but credentials email failed for ${savedEmployee.email}`, err?.stack || String(err));
             });
         }
         return savedEmployee;
@@ -145,7 +150,7 @@ let OurTeamService = class OurTeamService {
     }
 };
 exports.OurTeamService = OurTeamService;
-exports.OurTeamService = OurTeamService = __decorate([
+exports.OurTeamService = OurTeamService = OurTeamService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(our_team_entity_1.OurTeam)),
     __metadata("design:paramtypes", [typeorm_2.Repository,

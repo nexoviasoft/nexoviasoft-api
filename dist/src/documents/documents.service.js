@@ -1,15 +1,15 @@
 "use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-  var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-  if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-  else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-  return c > 3 && r && Object.defineProperty(target, key, r), r;
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 var __metadata = (this && this.__metadata) || function (k, v) {
-  if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var __param = (this && this.__param) || function (paramIndex, decorator) {
-  return function (target, key) { decorator(target, key, paramIndex); }
+    return function (target, key) { decorator(target, key, paramIndex); }
 };
 var DocumentsService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -20,125 +20,125 @@ const typeorm_2 = require("typeorm");
 const document_entity_1 = require("./entities/document.entity");
 const email_service_1 = require("../common/services/email.service");
 let DocumentsService = DocumentsService_1 = class DocumentsService {
-  constructor(documentRepository, emailService) {
-    this.documentRepository = documentRepository;
-    this.emailService = emailService;
-    this.logger = new common_1.Logger(DocumentsService_1.name);
-  }
-  async create(createDocumentDto) {
-    try {
-      this.logger.log(`Creating document with type: ${createDocumentDto.type}`);
-      this.logger.log(`Document data: ${JSON.stringify(createDocumentDto, null, 2)}`);
-      if (!createDocumentDto.data || typeof createDocumentDto.data !== 'object') {
-        throw new Error('Document data must be a valid object');
-      }
-      const cleanedDto = {
-        type: createDocumentDto.type,
-        template: createDocumentDto.template || null,
-        data: createDocumentDto.data,
-        documentNumber: createDocumentDto.documentNumber || null,
-        status: createDocumentDto.status || 'draft',
-      };
-      if (createDocumentDto.clientName && createDocumentDto.clientName.trim() !== '') {
-        cleanedDto.clientName = createDocumentDto.clientName.trim();
-      }
-      if (createDocumentDto.clientEmail && createDocumentDto.clientEmail.trim() !== '') {
-        cleanedDto.clientEmail = createDocumentDto.clientEmail.trim();
-      }
-      if (createDocumentDto.clientAddress && createDocumentDto.clientAddress.trim() !== '') {
-        cleanedDto.clientAddress = createDocumentDto.clientAddress.trim();
-      }
-      this.logger.log(`Cleaned DTO: ${JSON.stringify(cleanedDto, null, 2)}`);
-      const document = this.documentRepository.create(cleanedDto);
-      const savedDocument = await this.documentRepository.save(document);
-      const result = Array.isArray(savedDocument) ? savedDocument[0] : savedDocument;
-      this.logger.log(`Document created successfully with ID: ${result.id}`);
-      return result;
+    constructor(documentRepository, emailService) {
+        this.documentRepository = documentRepository;
+        this.emailService = emailService;
+        this.logger = new common_1.Logger(DocumentsService_1.name);
     }
-    catch (error) {
-      this.logger.error(`Error creating document: ${error.message}`, error.stack);
-      this.logger.error(`Error details: ${JSON.stringify(error)}`);
-      throw error;
+    async create(createDocumentDto) {
+        try {
+            this.logger.log(`Creating document with type: ${createDocumentDto.type}`);
+            this.logger.log(`Document data: ${JSON.stringify(createDocumentDto, null, 2)}`);
+            if (!createDocumentDto.data || typeof createDocumentDto.data !== 'object') {
+                throw new Error('Document data must be a valid object');
+            }
+            const cleanedDto = {
+                type: createDocumentDto.type,
+                template: createDocumentDto.template || null,
+                data: createDocumentDto.data,
+                documentNumber: createDocumentDto.documentNumber || null,
+                status: createDocumentDto.status || 'draft',
+            };
+            if (createDocumentDto.clientName && createDocumentDto.clientName.trim() !== '') {
+                cleanedDto.clientName = createDocumentDto.clientName.trim();
+            }
+            if (createDocumentDto.clientEmail && createDocumentDto.clientEmail.trim() !== '') {
+                cleanedDto.clientEmail = createDocumentDto.clientEmail.trim();
+            }
+            if (createDocumentDto.clientAddress && createDocumentDto.clientAddress.trim() !== '') {
+                cleanedDto.clientAddress = createDocumentDto.clientAddress.trim();
+            }
+            this.logger.log(`Cleaned DTO: ${JSON.stringify(cleanedDto, null, 2)}`);
+            const document = this.documentRepository.create(cleanedDto);
+            const savedDocument = await this.documentRepository.save(document);
+            const result = Array.isArray(savedDocument) ? savedDocument[0] : savedDocument;
+            this.logger.log(`Document created successfully with ID: ${result.id}`);
+            return result;
+        }
+        catch (error) {
+            this.logger.error(`Error creating document: ${error.message}`, error.stack);
+            this.logger.error(`Error details: ${JSON.stringify(error)}`);
+            throw error;
+        }
     }
-  }
-  async findAll() {
-    return await this.documentRepository.find({
-      order: { createdAt: 'DESC' },
-    });
-  }
-  async findOne(id) {
-    const document = await this.documentRepository.findOne({ where: { id } });
-    if (!document) {
-      throw new common_1.NotFoundException(`Document with ID ${id} not found`);
+    async findAll() {
+        return await this.documentRepository.find({
+            order: { createdAt: 'DESC' },
+        });
     }
-    return document;
-  }
-  async update(id, updateDocumentDto) {
-    const document = await this.findOne(id);
-    Object.assign(document, updateDocumentDto);
-    return await this.documentRepository.save(document);
-  }
-  async remove(id) {
-    const document = await this.findOne(id);
-    await this.documentRepository.remove(document);
-  }
-  async sendByEmail(id, recipientEmail, subject, message) {
-    const document = await this.findOne(id);
-    if (!document.clientEmail && !recipientEmail) {
-      throw new Error('Recipient email is required');
+    async findOne(id) {
+        const document = await this.documentRepository.findOne({ where: { id } });
+        if (!document) {
+            throw new common_1.NotFoundException(`Document with ID ${id} not found`);
+        }
+        return document;
     }
-    const emailTo = recipientEmail || document.clientEmail;
-    const documentSubject = subject || this.getDefaultSubject(document);
-    const emailMessage = message || this.getDefaultMessage(document);
-    try {
-      const pdfHtml = this.generatePdfHtml(document);
-      await this.emailService.sendDocumentEmail(emailTo, document.clientName || 'Valued Client', documentSubject, emailMessage, pdfHtml, document.type, document.documentNumber || `DOC-${document.id}`);
-      document.status = 'sent';
-      await this.documentRepository.save(document);
-      this.logger.log(`Document ${id} sent successfully to ${emailTo}`);
-      return {
-        success: true,
-        message: `Document sent successfully to ${emailTo}`,
-      };
+    async update(id, updateDocumentDto) {
+        const document = await this.findOne(id);
+        Object.assign(document, updateDocumentDto);
+        return await this.documentRepository.save(document);
     }
-    catch (error) {
-      this.logger.error(`Failed to send document ${id} to ${emailTo}:`, error);
-      throw error;
+    async remove(id) {
+        const document = await this.findOne(id);
+        await this.documentRepository.remove(document);
     }
-  }
-  getDefaultSubject(document) {
-    if (document.type === 'invoice') {
-      return `Invoice ${document.documentNumber || document.id}`;
+    async sendByEmail(id, recipientEmail, subject, message) {
+        const document = await this.findOne(id);
+        if (!document.clientEmail && !recipientEmail) {
+            throw new Error('Recipient email is required');
+        }
+        const emailTo = recipientEmail || document.clientEmail;
+        const documentSubject = subject || this.getDefaultSubject(document);
+        const emailMessage = message || this.getDefaultMessage(document);
+        try {
+            const pdfHtml = this.generatePdfHtml(document);
+            await this.emailService.sendDocumentEmail(emailTo, document.clientName || 'Valued Client', documentSubject, emailMessage, pdfHtml, document.type, document.documentNumber || `DOC-${document.id}`);
+            document.status = 'sent';
+            await this.documentRepository.save(document);
+            this.logger.log(`Document ${id} sent successfully to ${emailTo}`);
+            return {
+                success: true,
+                message: `Document sent successfully to ${emailTo}`,
+            };
+        }
+        catch (error) {
+            this.logger.error(`Failed to send document ${id} to ${emailTo}:`, error);
+            throw error;
+        }
     }
-    else if (document.type === 'letter') {
-      return `Official Letter - ${document.documentNumber || 'Reference'}`;
+    getDefaultSubject(document) {
+        if (document.type === 'invoice') {
+            return `Invoice ${document.documentNumber || document.id}`;
+        }
+        else if (document.type === 'letter') {
+            return `Official Letter - ${document.documentNumber || 'Reference'}`;
+        }
+        return `Document ${document.documentNumber || document.id}`;
     }
-    return `Document ${document.documentNumber || document.id}`;
-  }
-  getDefaultMessage(document) {
-    if (document.type === 'invoice') {
-      return `Dear ${document.clientName || 'Valued Client'},\n\nPlease find attached your invoice.\n\nThank you for your business.`;
+    getDefaultMessage(document) {
+        if (document.type === 'invoice') {
+            return `Dear ${document.clientName || 'Valued Client'},\n\nPlease find attached your invoice.\n\nThank you for your business.`;
+        }
+        else if (document.type === 'letter') {
+            return `Dear ${document.clientName || 'Recipient'},\n\nPlease find attached the official letter.\n\nBest regards,\nNexoviaSoft Team`;
+        }
+        return `Please find attached the requested document.`;
     }
-    else if (document.type === 'letter') {
-      return `Dear ${document.clientName || 'Recipient'},\n\nPlease find attached the official letter.\n\nBest regards,\nNexoviaSoft Team`;
+    generatePdfHtml(document) {
+        if (document.type === 'invoice') {
+            return this.generateInvoiceHtml(document.data);
+        }
+        else if (document.type === 'letter') {
+            return this.generateLetterHtml(document.data, document.template);
+        }
+        return '<html><body><p>Document content</p></body></html>';
     }
-    return `Please find attached the requested document.`;
-  }
-  generatePdfHtml(document) {
-    if (document.type === 'invoice') {
-      return this.generateInvoiceHtml(document.data);
-    }
-    else if (document.type === 'letter') {
-      return this.generateLetterHtml(document.data, document.template);
-    }
-    return '<html><body><p>Document content</p></body></html>';
-  }
-  generateInvoiceHtml(data) {
-    const items = data.items || [];
-    const total = items.reduce((sum, item) => {
-      return sum + (Number(item.quantity) * Number(item.rate));
-    }, 0);
-    return `
+    generateInvoiceHtml(data) {
+        const items = data.items || [];
+        const total = items.reduce((sum, item) => {
+            return sum + (Number(item.quantity) * Number(item.rate));
+        }, 0);
+        return `
       <!DOCTYPE html>
       <html>
       <head>
@@ -222,16 +222,16 @@ let DocumentsService = DocumentsService_1 = class DocumentsService {
       </body>
       </html>
     `;
-  }
-  generateLetterHtml(data, template) {
-    const getLetterTitle = () => {
-      if (template === 'offer-letter')
-        return 'JOB OFFER LETTER';
-      if (template === 'appointment-letter')
-        return 'LETTER OF APPOINTMENT';
-      return 'OFFICIAL LETTER';
-    };
-    return `
+    }
+    generateLetterHtml(data, template) {
+        const getLetterTitle = () => {
+            if (template === 'offer-letter')
+                return 'JOB OFFER LETTER';
+            if (template === 'appointment-letter')
+                return 'LETTER OF APPOINTMENT';
+            return 'OFFICIAL LETTER';
+        };
+        return `
       <!DOCTYPE html>
       <html>
       <head>
@@ -299,13 +299,13 @@ let DocumentsService = DocumentsService_1 = class DocumentsService {
       </body>
       </html>
     `;
-  }
+    }
 };
 exports.DocumentsService = DocumentsService;
 exports.DocumentsService = DocumentsService = DocumentsService_1 = __decorate([
-  (0, common_1.Injectable)(),
-  __param(0, (0, typeorm_1.InjectRepository)(document_entity_1.Document)),
-  __metadata("design:paramtypes", [typeorm_2.Repository,
-  email_service_1.EmailService])
+    (0, common_1.Injectable)(),
+    __param(0, (0, typeorm_1.InjectRepository)(document_entity_1.Document)),
+    __metadata("design:paramtypes", [typeorm_2.Repository,
+        email_service_1.EmailService])
 ], DocumentsService);
 //# sourceMappingURL=documents.service.js.map
