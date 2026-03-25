@@ -19,7 +19,7 @@ export class EmailService {
     host: 'smtp.gmail.com',
     user: 'nexoviasoft@gmail.com',
     password: 'ofjw yqfx pllm hzpk',
-    from: process.env.SMTP_FROM,
+    from: 'nexoviasoft@gmail.com',
   };
 
   constructor() {

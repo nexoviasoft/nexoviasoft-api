@@ -60,17 +60,13 @@ let EmailService = EmailService_1 = class EmailService {
     constructor() {
         this.logger = new common_1.Logger(EmailService_1.name);
         this.smtpConfig = {
-            host: process.env.SMTP_HOST || 'smtp.gmail.com',
-            port: Number(process.env.SMTP_PORT || 587),
-            secure: process.env.SMTP_SECURE === 'true',
-            user: process.env.SMTP_USER || 'innowavesolutioninfo@gmail.com',
-            password: process.env.SMTP_PASS || 'eydh kgcs wplp avzv',
+            host: 'smtp.gmail.com',
+            user: 'nexoviasoft@gmail.com',
+            password: 'ofjw yqfx pllm hzpk',
             from: process.env.SMTP_FROM,
         };
         this.transporter = nodemailer.createTransport({
             host: this.smtpConfig.host,
-            port: this.smtpConfig.port,
-            secure: this.smtpConfig.secure,
             auth: {
                 user: this.smtpConfig.user,
                 pass: this.smtpConfig.password,

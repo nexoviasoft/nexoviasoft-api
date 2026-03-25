@@ -31,21 +31,27 @@ export class OurTeamService {
     } as Partial<OurTeam>);
     
     const savedEmployee = await this.ourTeamRepository.save(employee);
-    
-    if (savedEmployee.email) {
-      this.emailService
-        .sendTeamMemberCredentials(
-          savedEmployee.email,
-          `${savedEmployee.firstName} ${savedEmployee.lastName}`,
-          createOurTeamDto.password,
-          savedEmployee.position || 'Team Member',
-        )
-        .catch((err) => {
-          this.logger.error(
-            `Team member created but credentials email failed for ${savedEmployee.email}`,
-            err?.stack || String(err),
-          );
-        });
+
+    const recipientEmail = savedEmployee.email?.trim();
+    if (!recipientEmail) {
+      this.logger.warn(
+        `Team member created without a valid email. Credentials email skipped for employee ID ${savedEmployee.id}.`,
+      );
+      return savedEmployee;
+    }
+
+    try {
+      await this.emailService.sendTeamMemberCredentials(
+        recipientEmail,
+        `${savedEmployee.firstName} ${savedEmployee.lastName}`,
+        createOurTeamDto.password,
+        savedEmployee.position || 'Team Member',
+      );
+    } catch (err) {
+      this.logger.error(
+        `Team member created but credentials email failed for ${recipientEmail}`,
+        err?.stack || String(err),
+      );
     }
     
     return savedEmployee;
