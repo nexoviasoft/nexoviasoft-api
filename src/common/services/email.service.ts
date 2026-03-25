@@ -15,19 +15,23 @@ import { getProjectAssignmentTemplate } from '../templates/project-assignment.te
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private transporter: nodemailer.Transporter;
-  private readonly smtpConfig = {
-    host: 'smtp.gmail.com',
-    user: 'innowavesolutioninfo@gmail.com',
-    password: 'eydh kgcs wplp avzv',
-  };
-ß
+
+
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: this.smtpConfig.host,
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
       auth: {
-        user: this.smtpConfig.user,
-        pass: this.smtpConfig.password,
+        user: 'innowavesolutioninfo@gmail.com',
+        pass: 'eydh kgcs wplp avzv',
       },
+      tls: {
+        rejectUnauthorized: false,
+      },
+      connectionTimeout: 30000,
+      greetingTimeout: 30000,
+      socketTimeout: 30000,
     });
   }
 

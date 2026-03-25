@@ -2,7 +2,6 @@ export declare class EmailService {
     private readonly logger;
     private transporter;
     private readonly smtpConfig;
-    ß: any;
     constructor();
     sendServiceRequestConfirmation(to: string, clientName: string, serviceType: string): Promise<void>;
     sendScheduleAssignment(to: string, teamMemberName: string, shifts: Array<{
