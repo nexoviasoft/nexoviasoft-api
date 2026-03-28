@@ -11,19 +11,23 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var ReqcuitmentService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReqcuitmentService = void 0;
 const common_1 = require("@nestjs/common");
 const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
+const imagebb_service_1 = require("../common/services/imagebb.service");
 const job_posting_entity_1 = require("./entities/job-posting.entity");
 const candidate_entity_1 = require("./entities/candidate.entity");
 const interview_entity_1 = require("./entities/interview.entity");
-let ReqcuitmentService = class ReqcuitmentService {
-    constructor(jobPostingRepository, candidateRepository, interviewRepository) {
+let ReqcuitmentService = ReqcuitmentService_1 = class ReqcuitmentService {
+    constructor(jobPostingRepository, candidateRepository, interviewRepository, imageBBService) {
         this.jobPostingRepository = jobPostingRepository;
         this.candidateRepository = candidateRepository;
         this.interviewRepository = interviewRepository;
+        this.imageBBService = imageBBService;
+        this.logger = new common_1.Logger(ReqcuitmentService_1.name);
     }
     async createJobPosting(createJobPostingDto) {
         const jobPosting = this.jobPostingRepository.create({
@@ -65,8 +69,18 @@ let ReqcuitmentService = class ReqcuitmentService {
         return this.jobPostingRepository.remove(jobPosting);
     }
     async createCandidate(createCandidateDto) {
+        let cvUrl = createCandidateDto.cvUrl;
+        if (createCandidateDto.cvData && !cvUrl) {
+            try {
+                cvUrl = await this.imageBBService.upload(createCandidateDto.cvData);
+            }
+            catch (error) {
+                this.logger.error(`Failed to upload CV for ${createCandidateDto.name}: ${error.message}`);
+            }
+        }
         const candidate = this.candidateRepository.create({
             ...createCandidateDto,
+            cvUrl,
             appliedDate: createCandidateDto.appliedDate
                 ? new Date(createCandidateDto.appliedDate)
                 : new Date(),
@@ -176,13 +190,14 @@ let ReqcuitmentService = class ReqcuitmentService {
     }
 };
 exports.ReqcuitmentService = ReqcuitmentService;
-exports.ReqcuitmentService = ReqcuitmentService = __decorate([
+exports.ReqcuitmentService = ReqcuitmentService = ReqcuitmentService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(job_posting_entity_1.JobPosting)),
     __param(1, (0, typeorm_1.InjectRepository)(candidate_entity_1.Candidate)),
     __param(2, (0, typeorm_1.InjectRepository)(interview_entity_1.Interview)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
-        typeorm_2.Repository])
+        typeorm_2.Repository,
+        imagebb_service_1.ImageBBService])
 ], ReqcuitmentService);
 //# sourceMappingURL=reqcuitment.service.js.map

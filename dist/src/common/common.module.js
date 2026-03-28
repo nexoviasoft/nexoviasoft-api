@@ -10,14 +10,15 @@ exports.CommonModule = void 0;
 const common_1 = require("@nestjs/common");
 const email_service_1 = require("./services/email.service");
 const google_calendar_service_1 = require("./services/google-calendar.service");
+const imagebb_service_1 = require("./services/imagebb.service");
 let CommonModule = class CommonModule {
 };
 exports.CommonModule = CommonModule;
 exports.CommonModule = CommonModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
-        providers: [email_service_1.EmailService, google_calendar_service_1.GoogleCalendarService],
-        exports: [email_service_1.EmailService, google_calendar_service_1.GoogleCalendarService],
+        providers: [email_service_1.EmailService, google_calendar_service_1.GoogleCalendarService, imagebb_service_1.ImageBBService],
+        exports: [email_service_1.EmailService, google_calendar_service_1.GoogleCalendarService, imagebb_service_1.ImageBBService],
     })
 ], CommonModule);
 //# sourceMappingURL=common.module.js.map

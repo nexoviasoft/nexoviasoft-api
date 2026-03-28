@@ -78,6 +78,8 @@ export declare class DashboardController {
             data: {
                 label: string;
                 income: number;
+                expense: number;
+                profit: number;
             }[];
         };
     }>;

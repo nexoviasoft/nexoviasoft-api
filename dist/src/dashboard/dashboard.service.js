@@ -23,8 +23,9 @@ const order_entity_1 = require("../order/entities/order.entity");
 const payroll_entity_1 = require("../payroll/entities/payroll.entity");
 const schedule_entity_1 = require("../schedule/entities/schedule.entity");
 const our_client_entity_1 = require("../setting/our-client/entities/our-client.entity");
+const expense_entity_1 = require("../expense/entities/expense.entity");
 let DashboardService = class DashboardService {
-    constructor(clientRepository, orderRepository, payrollRepository, attendanceRepository, leaveRepository, meetingRepository, scheduleRepository) {
+    constructor(clientRepository, orderRepository, payrollRepository, attendanceRepository, leaveRepository, meetingRepository, scheduleRepository, expenseRepository) {
         this.clientRepository = clientRepository;
         this.orderRepository = orderRepository;
         this.payrollRepository = payrollRepository;
@@ -32,6 +33,7 @@ let DashboardService = class DashboardService {
         this.leaveRepository = leaveRepository;
         this.meetingRepository = meetingRepository;
         this.scheduleRepository = scheduleRepository;
+        this.expenseRepository = expenseRepository;
     }
     async getActivity(tab) {
         const t = String(tab || 'attendance').toLowerCase();
@@ -129,7 +131,7 @@ let DashboardService = class DashboardService {
     async getSummary(_user) {
         const now = new Date();
         const activeCustomersSince = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        const [totalCustomers, activeCustomers, orderAmounts, payrollTotals, attendanceRows, nextMeeting] = await Promise.all([
+        const [totalCustomers, activeCustomers, orderAmounts, payrollTotals, expenseTotals, attendanceRows, nextMeeting] = await Promise.all([
             this.clientRepository.count(),
             this.orderRepository
                 .createQueryBuilder('o')
@@ -140,6 +142,11 @@ let DashboardService = class DashboardService {
             this.payrollRepository
                 .createQueryBuilder('p')
                 .select('COALESCE(SUM(p.netPay), 0)', 'totalCost')
+                .getRawOne(),
+            this.expenseRepository
+                .createQueryBuilder('e')
+                .select('COALESCE(SUM(e.amount), 0)', 'totalAmount')
+                .where('e.status = :status', { status: expense_entity_1.ExpenseStatus.APPROVED })
                 .getRawOne(),
             this.attendanceRepository.find({
                 relations: ['team'],
@@ -152,7 +159,9 @@ let DashboardService = class DashboardService {
             }),
         ]);
         const revenueTotal = orderAmounts.reduce((sum, o) => sum + Number(o.amount || 0), 0);
-        const expenseTotal = Number(payrollTotals?.totalCost ?? 0);
+        const payrollExpense = Number(payrollTotals?.totalCost ?? 0);
+        const additionalExpense = Number(expenseTotals?.totalAmount ?? 0);
+        const expenseTotal = payrollExpense + additionalExpense;
         const profitTotal = revenueTotal - expenseTotal;
         const allAttendances = await this.attendanceRepository.find();
         const stats = { total: allAttendances.length, onTime: 0, late: 0, absent: 0 };
@@ -313,87 +322,87 @@ let DashboardService = class DashboardService {
         const p = this.normalizePeriod(period);
         const now = new Date();
         const today = this.startOfDay(now);
+        let start;
+        let length;
+        let format;
+        let interval;
         if (p === 'weekly') {
-            const start = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000);
-            const rows = await this.orderRepository
-                .createQueryBuilder('o')
-                .select(`TO_CHAR("o"."createdAt"::date, 'YYYY-MM-DD')`, 'day')
-                .addSelect(`COALESCE(SUM("o"."amount"), 0)`, 'income')
-                .where('o.createdAt >= :start', { start: start.toISOString() })
-                .groupBy('day')
-                .orderBy('day', 'ASC')
-                .getRawMany();
-            const map = new Map(rows.map((r) => [r.day, r]));
-            const data = Array.from({ length: 7 }, (_, i) => {
-                const d = new Date(start.getTime() + i * 24 * 60 * 60 * 1000);
-                const key = d.toISOString().slice(0, 10);
-                const income = Number(map.get(key)?.income ?? 0);
-                const label = d.toLocaleDateString('en-US', { weekday: 'short' });
-                return { label, income };
-            });
-            return { period: 'Weekly', data };
+            start = new Date(today.getTime() - 6 * 24 * 60 * 60 * 1000);
+            length = 7;
+            format = 'YYYY-MM-DD';
+            interval = 'day';
         }
-        if (p === 'monthly') {
-            const start = new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000);
-            const rows = await this.orderRepository
-                .createQueryBuilder('o')
-                .select(`TO_CHAR("o"."createdAt"::date, 'YYYY-MM-DD')`, 'day')
-                .addSelect(`COALESCE(SUM("o"."amount"), 0)`, 'income')
-                .where('o.createdAt >= :start', { start: start.toISOString() })
-                .groupBy('day')
-                .orderBy('day', 'ASC')
-                .getRawMany();
-            const map = new Map(rows.map((r) => [r.day, r]));
-            const data = Array.from({ length: 30 }, (_, i) => {
-                const d = new Date(start.getTime() + i * 24 * 60 * 60 * 1000);
-                const key = d.toISOString().slice(0, 10);
-                const income = Number(map.get(key)?.income ?? 0);
-                const label = String(d.getDate()).padStart(2, '0');
-                return { label, income };
-            });
-            return { period: 'Monthly', data };
+        else if (p === 'monthly') {
+            start = new Date(today.getTime() - 29 * 24 * 60 * 60 * 1000);
+            length = 30;
+            format = 'YYYY-MM-DD';
+            interval = 'day';
         }
-        if (p === 'quarterly') {
-            const start = new Date(today.getTime() - 89 * 24 * 60 * 60 * 1000);
-            const rows = await this.orderRepository
-                .createQueryBuilder('o')
-                .select(`TO_CHAR("o"."createdAt"::date, 'YYYY-MM-DD')`, 'day')
-                .addSelect(`COALESCE(SUM("o"."amount"), 0)`, 'income')
-                .where('o.createdAt >= :start', { start: start.toISOString() })
-                .groupBy('day')
-                .orderBy('day', 'ASC')
-                .getRawMany();
-            const map = new Map(rows.map((r) => [r.day, r]));
-            const data = Array.from({ length: 90 }, (_, i) => {
-                const d = new Date(start.getTime() + i * 24 * 60 * 60 * 1000);
-                const key = d.toISOString().slice(0, 10);
-                const income = Number(map.get(key)?.income ?? 0);
-                const label = String(i + 1).padStart(2, '0');
-                return { label, income };
-            });
-            return { period: 'Quarterly', data };
+        else if (p === 'quarterly') {
+            start = new Date(today.getTime() - 89 * 24 * 60 * 60 * 1000);
+            length = 90;
+            format = 'YYYY-MM-DD';
+            interval = 'day';
         }
-        const start = new Date(today);
-        start.setMonth(start.getMonth() - 11);
-        start.setDate(1);
-        const rows = await this.orderRepository
+        else {
+            start = new Date(today);
+            start.setMonth(start.getMonth() - 11);
+            start.setDate(1);
+            length = 12;
+            format = 'YYYY-MM';
+            interval = 'month';
+        }
+        const incomeRows = await this.orderRepository
             .createQueryBuilder('o')
-            .select(`TO_CHAR(DATE_TRUNC('month', "o"."createdAt"), 'YYYY-MM')`, 'ym')
-            .addSelect(`COALESCE(SUM("o"."amount"), 0)`, 'income')
+            .select(`TO_CHAR(DATE_TRUNC('${interval}', "o"."createdAt"), '${format}')`, 'key')
+            .addSelect(`COALESCE(SUM("o"."amount"), 0)`, 'amount')
             .where('o.createdAt >= :start', { start: start.toISOString() })
-            .groupBy('ym')
-            .orderBy('ym', 'ASC')
+            .groupBy('key')
             .getRawMany();
-        const map = new Map(rows.map((r) => [r.ym, r]));
-        const data = Array.from({ length: 12 }, (_, i) => {
+        const payrollRows = await this.payrollRepository
+            .createQueryBuilder('p')
+            .select(`TO_CHAR(DATE_TRUNC('${interval}', "p"."createdAt"), '${format}')`, 'key')
+            .addSelect(`COALESCE(SUM("p"."netPay"), 0)`, 'amount')
+            .where('p.createdAt >= :start', { start: start.toISOString() })
+            .groupBy('key')
+            .getRawMany();
+        const expenseRows = await this.expenseRepository
+            .createQueryBuilder('e')
+            .select(`TO_CHAR(DATE_TRUNC('${interval}', "e"."createdAt"), '${format}')`, 'key')
+            .addSelect(`COALESCE(SUM("e"."amount"), 0)`, 'amount')
+            .where('e.createdAt >= :start', { start: start.toISOString() })
+            .andWhere('e.status = :status', { status: expense_entity_1.ExpenseStatus.APPROVED })
+            .groupBy('key')
+            .getRawMany();
+        const incomeMap = new Map(incomeRows.map((r) => [r.key, Number(r.amount)]));
+        const payrollMap = new Map(payrollRows.map((r) => [r.key, Number(r.amount)]));
+        const expenseMap = new Map(expenseRows.map((r) => [r.key, Number(r.amount)]));
+        const data = Array.from({ length }, (_, i) => {
             const d = new Date(start);
-            d.setMonth(start.getMonth() + i);
-            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-            const income = Number(map.get(key)?.income ?? 0);
-            const label = d.toLocaleDateString('en-US', { month: 'short' });
-            return { label, income };
+            if (interval === 'day') {
+                d.setDate(start.getDate() + i);
+            }
+            else {
+                d.setMonth(start.getMonth() + i);
+            }
+            const key = interval === 'day'
+                ? d.toISOString().slice(0, 10)
+                : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            const income = incomeMap.get(key) || 0;
+            const expense = (payrollMap.get(key) || 0) + (expenseMap.get(key) || 0);
+            const profit = income - expense;
+            let label;
+            if (p === 'weekly')
+                label = d.toLocaleDateString('en-US', { weekday: 'short' });
+            else if (p === 'monthly')
+                label = String(d.getDate()).padStart(2, '0');
+            else if (p === 'quarterly')
+                label = String(i + 1).padStart(2, '0');
+            else
+                label = d.toLocaleDateString('en-US', { month: 'short' });
+            return { label, income, expense, profit };
         });
-        return { period: 'Yearly', data };
+        return { period: p.charAt(0).toUpperCase() + p.slice(1), data };
     }
 };
 exports.DashboardService = DashboardService;
@@ -406,7 +415,9 @@ exports.DashboardService = DashboardService = __decorate([
     __param(4, (0, typeorm_1.InjectRepository)(leave_entity_1.Leave)),
     __param(5, (0, typeorm_1.InjectRepository)(meeting_entity_1.Meeting)),
     __param(6, (0, typeorm_1.InjectRepository)(schedule_entity_1.Schedule)),
+    __param(7, (0, typeorm_1.InjectRepository)(expense_entity_1.Expense)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
+        typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,

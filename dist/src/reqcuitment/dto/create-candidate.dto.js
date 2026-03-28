@@ -71,5 +71,10 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
+], CreateCandidateDto.prototype, "cvUrl", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
 ], CreateCandidateDto.prototype, "cvFilename", void 0);
 //# sourceMappingURL=create-candidate.dto.js.map

@@ -78,13 +78,9 @@ __decorate([
     __metadata("design:type", Date)
 ], Candidate.prototype, "updatedAt", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
-    __metadata("design:type", String)
-], Candidate.prototype, "cvData", void 0);
-__decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
-], Candidate.prototype, "cvFilename", void 0);
+], Candidate.prototype, "cvUrl", void 0);
 exports.Candidate = Candidate = __decorate([
     (0, typeorm_1.Entity)('candidates')
 ], Candidate);

@@ -10,5 +10,6 @@ export declare class CreateCandidateDto {
     skills?: string[];
     jobPostingId?: number;
     cvData?: string;
+    cvUrl?: string;
     cvFilename?: string;
 }

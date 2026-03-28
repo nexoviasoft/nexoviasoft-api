@@ -6,6 +6,7 @@ import { Order } from '../order/entities/order.entity';
 import { Payroll } from '../payroll/entities/payroll.entity';
 import { Schedule } from '../schedule/entities/schedule.entity';
 import { OurClient } from '../setting/our-client/entities/our-client.entity';
+import { Expense } from '../expense/entities/expense.entity';
 export declare class DashboardService {
     private readonly clientRepository;
     private readonly orderRepository;
@@ -14,7 +15,8 @@ export declare class DashboardService {
     private readonly leaveRepository;
     private readonly meetingRepository;
     private readonly scheduleRepository;
-    constructor(clientRepository: Repository<OurClient>, orderRepository: Repository<Order>, payrollRepository: Repository<Payroll>, attendanceRepository: Repository<Attendance>, leaveRepository: Repository<Leave>, meetingRepository: Repository<Meeting>, scheduleRepository: Repository<Schedule>);
+    private readonly expenseRepository;
+    constructor(clientRepository: Repository<OurClient>, orderRepository: Repository<Order>, payrollRepository: Repository<Payroll>, attendanceRepository: Repository<Attendance>, leaveRepository: Repository<Leave>, meetingRepository: Repository<Meeting>, scheduleRepository: Repository<Schedule>, expenseRepository: Repository<Expense>);
     getActivity(tab?: string): Promise<{
         tab: string;
         items: {
@@ -132,6 +134,8 @@ export declare class DashboardService {
         data: {
             label: string;
             income: number;
+            expense: number;
+            profit: number;
         }[];
     }>;
 }

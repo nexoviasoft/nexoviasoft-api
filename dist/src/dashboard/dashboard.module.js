@@ -18,6 +18,7 @@ const schedule_entity_1 = require("../schedule/entities/schedule.entity");
 const our_client_entity_1 = require("../setting/our-client/entities/our-client.entity");
 const dashboard_controller_1 = require("./dashboard.controller");
 const dashboard_service_1 = require("./dashboard.service");
+const expense_entity_1 = require("../expense/entities/expense.entity");
 let DashboardModule = class DashboardModule {
 };
 exports.DashboardModule = DashboardModule;
@@ -32,6 +33,7 @@ exports.DashboardModule = DashboardModule = __decorate([
                 leave_entity_1.Leave,
                 meeting_entity_1.Meeting,
                 schedule_entity_1.Schedule,
+                expense_entity_1.Expense,
             ]),
         ],
         controllers: [dashboard_controller_1.DashboardController],

@@ -1,4 +1,5 @@
 import { Repository } from 'typeorm';
+import { ImageBBService } from '../common/services/imagebb.service';
 import { JobPosting } from './entities/job-posting.entity';
 import { Candidate } from './entities/candidate.entity';
 import { Interview } from './entities/interview.entity';
@@ -12,7 +13,9 @@ export declare class ReqcuitmentService {
     private readonly jobPostingRepository;
     private readonly candidateRepository;
     private readonly interviewRepository;
-    constructor(jobPostingRepository: Repository<JobPosting>, candidateRepository: Repository<Candidate>, interviewRepository: Repository<Interview>);
+    private readonly imageBBService;
+    constructor(jobPostingRepository: Repository<JobPosting>, candidateRepository: Repository<Candidate>, interviewRepository: Repository<Interview>, imageBBService: ImageBBService);
+    private readonly logger;
     createJobPosting(createJobPostingDto: CreateJobPostingDto): Promise<JobPosting>;
     findAllJobPostings(): Promise<JobPosting[]>;
     findOneJobPosting(id: number): Promise<JobPosting>;

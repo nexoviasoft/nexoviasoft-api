@@ -9,6 +9,7 @@ import { Schedule } from '../schedule/entities/schedule.entity';
 import { OurClient } from '../setting/our-client/entities/our-client.entity';
 import { DashboardController } from './dashboard.controller';
 import { DashboardService } from './dashboard.service';
+import { Expense } from '../expense/entities/expense.entity';
 
 @Module({
   imports: [
@@ -20,10 +21,11 @@ import { DashboardService } from './dashboard.service';
       Leave,
       Meeting,
       Schedule,
+      Expense,
     ]),
   ],
   controllers: [DashboardController],
   providers: [DashboardService],
 })
-export class DashboardModule {}
+export class DashboardModule { }
 

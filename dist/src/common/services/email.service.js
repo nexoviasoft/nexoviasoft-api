@@ -63,7 +63,7 @@ let EmailService = EmailService_1 = class EmailService {
             host: 'smtp.gmail.com',
             user: 'nexoviasoft@gmail.com',
             password: 'ofjw yqfx pllm hzpk',
-            from: process.env.SMTP_FROM,
+            from: 'nexoviasoft@gmail.com',
         };
         this.transporter = nodemailer.createTransport({
             host: this.smtpConfig.host,
