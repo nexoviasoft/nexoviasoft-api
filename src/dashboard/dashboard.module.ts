@@ -10,6 +10,8 @@ import { OurClient } from '../setting/our-client/entities/our-client.entity';
 import { DashboardController } from './dashboard.controller';
 import { DashboardService } from './dashboard.service';
 import { Expense } from '../expense/entities/expense.entity';
+import { OurTeam } from '../setting/home/our-team/entities/our-team.entity';
+import { Department } from '../setting/department/entities/department.entity';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { Expense } from '../expense/entities/expense.entity';
       Meeting,
       Schedule,
       Expense,
+      OurTeam,
+      Department,
     ]),
   ],
   controllers: [DashboardController],

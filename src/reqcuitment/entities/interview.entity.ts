@@ -35,6 +35,9 @@ export class Interview {
   @Column({ default: 'Scheduled' })
   status: string; // Scheduled, Completed, Cancelled, Rescheduled
 
+  @Column({ nullable: true })
+  meetLink?: string;
+
   @ManyToOne(() => Candidate, (candidate) => candidate.interviews, { nullable: true })
   @JoinColumn({ name: 'candidateId' })
   candidateEntity: Candidate;

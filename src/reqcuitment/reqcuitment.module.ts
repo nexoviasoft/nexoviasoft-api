@@ -5,10 +5,11 @@ import { ReqcuitmentController } from './reqcuitment.controller';
 import { JobPosting } from './entities/job-posting.entity';
 import { Candidate } from './entities/candidate.entity';
 import { Interview } from './entities/interview.entity';
+import { Department } from '../setting/department/entities/department.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([JobPosting, Candidate, Interview]),
+    TypeOrmModule.forFeature([JobPosting, Candidate, Interview, Department]),
   ],
   controllers: [ReqcuitmentController],
   providers: [ReqcuitmentService],

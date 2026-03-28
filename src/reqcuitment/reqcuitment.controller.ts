@@ -133,6 +133,17 @@ export class ReqcuitmentController {
     };
   }
 
+  @Post('interviews/bulk')
+  @HttpCode(HttpStatus.CREATED)
+  async createBulkInterviews(@Body() body: { interview: CreateInterviewDto, candidateIds: number[] }) {
+    const data = await this.reqcuitmentService.createBulkInterviews(body.interview, body.candidateIds);
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: `${data.length} interviews scheduled successfully`,
+      data,
+    };
+  }
+
   @Get('interviews')
   @HttpCode(HttpStatus.OK)
   async findAllInterviews() {

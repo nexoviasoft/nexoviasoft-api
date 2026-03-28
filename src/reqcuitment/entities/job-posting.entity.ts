@@ -41,8 +41,17 @@ export class JobPosting {
   @Column({ default: 0 })
   applicants: number;
 
+  @Column({ default: 1 })
+  vacancy: number;
+
   @Column({ type: 'date', nullable: true })
   postedDate: Date;
+
+  @Column({ type: 'date', nullable: true })
+  startDate: Date;
+
+  @Column({ type: 'date', nullable: true })
+  expiryDate: Date;
 
   @Column({ type: 'text', nullable: true })
   description: string;

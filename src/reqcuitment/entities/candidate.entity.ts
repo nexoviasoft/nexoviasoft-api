@@ -51,7 +51,7 @@ export class Candidate {
   @Column({ nullable: true })
   jobPostingId: number;
 
-  @OneToMany(() => Interview, (interview) => interview.candidate)
+  @OneToMany(() => Interview, (interview) => interview.candidateEntity)
   interviews: Interview[];
 
   @CreateDateColumn()
@@ -62,4 +62,10 @@ export class Candidate {
 
   @Column({ nullable: true })
   cvUrl: string;
+
+  @Column({ type: 'text', nullable: true })
+  cvData: string;
+
+  @Column({ nullable: true })
+  cvFilename: string;
 }

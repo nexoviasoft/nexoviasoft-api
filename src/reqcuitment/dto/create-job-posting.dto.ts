@@ -29,8 +29,21 @@ export class CreateJobPostingDto {
   applicants?: number;
 
   @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  vacancy?: number;
+
+  @IsOptional()
   @IsDateString()
   postedDate?: string;
+
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
+
+  @IsOptional()
+  @IsDateString()
+  expiryDate?: string;
 
   @IsOptional()
   @IsString()

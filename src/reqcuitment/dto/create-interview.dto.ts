@@ -26,4 +26,8 @@ export class CreateInterviewDto {
   @IsOptional()
   @IsNumber()
   candidateId?: number;
+
+  @IsOptional()
+  @IsString()
+  meetLink?: string;
 }
