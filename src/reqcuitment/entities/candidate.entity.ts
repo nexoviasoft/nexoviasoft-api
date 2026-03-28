@@ -60,9 +60,6 @@ export class Candidate {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Column({ type: 'text', nullable: true })
-  cvData: string;
-
   @Column({ nullable: true })
-  cvFilename: string;
+  cvUrl: string;
 }

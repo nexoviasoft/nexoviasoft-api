@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ImageBBService } from '../common/services/imagebb.service';
 import { JobPosting } from './entities/job-posting.entity';
 import { Candidate } from './entities/candidate.entity';
 import { Interview } from './entities/interview.entity';
@@ -20,7 +21,10 @@ export class ReqcuitmentService {
     private readonly candidateRepository: Repository<Candidate>,
     @InjectRepository(Interview)
     private readonly interviewRepository: Repository<Interview>,
+    private readonly imageBBService: ImageBBService,
   ) {}
+
+  private readonly logger = new Logger(ReqcuitmentService.name);
 
   // Job Posting methods
   async createJobPosting(createJobPostingDto: CreateJobPostingDto) {
@@ -71,8 +75,22 @@ export class ReqcuitmentService {
 
   // Candidate methods
   async createCandidate(createCandidateDto: CreateCandidateDto) {
+    let cvUrl = createCandidateDto.cvUrl;
+
+    // If base64 cvData is provided but no cvUrl, upload to ImageBB
+    if (createCandidateDto.cvData && !cvUrl) {
+      try {
+        cvUrl = await this.imageBBService.upload(createCandidateDto.cvData);
+      } catch (error) {
+        this.logger.error(`Failed to upload CV for ${createCandidateDto.name}: ${error.message}`);
+        // We continue anyway, or we could throw an error. 
+        // Let's continue for now to avoid blocking the whole application.
+      }
+    }
+
     const candidate = this.candidateRepository.create({
       ...createCandidateDto,
+      cvUrl,
       appliedDate: createCandidateDto.appliedDate 
         ? new Date(createCandidateDto.appliedDate) 
         : new Date(),

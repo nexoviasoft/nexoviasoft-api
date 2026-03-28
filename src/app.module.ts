@@ -31,6 +31,7 @@ import { ReportsModule } from './reports/reports.module';
 import { BroadcastModule } from './broadcast/broadcast.module';
 import { MeetingModule } from './meeting/meeting.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { ExpenseModule } from './expense/expense.module';
 
 
 @Module({
@@ -92,6 +93,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     BroadcastModule,
     MeetingModule,
     DashboardModule,
+    ExpenseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

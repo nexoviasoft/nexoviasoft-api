@@ -45,5 +45,9 @@ export class CreateCandidateDto {
 
   @IsOptional()
   @IsString()
+  cvUrl?: string;
+
+  @IsOptional()
+  @IsString()
   cvFilename?: string;
 }

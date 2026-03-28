@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { json, urlencoded } from 'express';
 
 let cachedApp: NestExpressApplication;
 
@@ -12,7 +13,9 @@ export async function getApp() {
       origin: true, // ✅ সব domain allow
       credentials: false, // optional: cookie/credential নেই
     });
-    // ddd
+
+    app.use(json({ limit: '50mb' }));
+    app.use(urlencoded({ extended: true, limit: '50mb' }));
 
 
     await app.init();
