@@ -77,9 +77,9 @@ export class MeetingService {
         throw new Error('Google Calendar did not return a Meet link');
       }
       meetingLink = meet.meetLink;
-    } catch (err) {
-      this.logger.error(`Google Meet event creation failed for ${meetingId}`, err as any);
-      throw new BadRequestException('Failed to create Google Meet link');
+    } catch (err: any) {
+      this.logger.error(`Google Meet event creation failed for ${meetingId}`, err);
+      throw new BadRequestException(`Failed to create Google Meet link: ${err?.message || 'Internal connection error'}`);
     }
 
     const meeting = this.meetingRepository.create({

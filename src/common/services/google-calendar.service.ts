@@ -20,7 +20,10 @@ export class GoogleCalendarService {
     this.calendarId = 'primary';
 
     const auth = new google.auth.GoogleAuth({
-      credentials: { client_email: clientEmail, private_key: privateKey },
+      credentials: { 
+        client_email: clientEmail, 
+        private_key: privateKey.replace(/\\n/g, '\n') 
+      },
       scopes: ['https://www.googleapis.com/auth/calendar'],
     });
 
@@ -102,6 +105,7 @@ export class GoogleCalendarService {
         (status === 429 || (status >= 500 && status < 600)) && attempt <= 5;
 
       if (!isRetryable) {
+        this.logger.error(`Google API request failed: ${error.message}`, error.response?.data);
         throw error;
       }
 
