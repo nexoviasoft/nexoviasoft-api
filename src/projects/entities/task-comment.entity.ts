@@ -29,6 +29,9 @@ export class TaskComment {
   @Column({ type: 'json', nullable: true })
   mentions: string[]; // Array of mentioned usernames
 
+  @Column({ nullable: true })
+  parentId: number;
+
   @CreateDateColumn()
   createdAt: Date;
 }

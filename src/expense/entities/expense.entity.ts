@@ -60,6 +60,9 @@ export class Expense {
 
   @Column({ nullable: true })
   approverId: number;
+  
+  @Column({ type: 'text', nullable: true })
+  rejectionReason: string;
 
   @CreateDateColumn()
   createdAt: Date;

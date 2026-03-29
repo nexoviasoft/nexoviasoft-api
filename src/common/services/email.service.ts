@@ -10,6 +10,9 @@ import { getDocumentEmailTemplate } from '../templates/document-email.template';
 import { getMeetingInvitationTemplate } from '../templates/meeting-invitation.template';
 import { getTeamMemberCredentialsTemplate } from '../templates/team-member-credentials.template';
 import { getProjectAssignmentTemplate } from '../templates/project-assignment.template';
+import { getExpenseApprovalTemplate } from '../templates/expense-approval.template';
+import { getExpenseRejectionTemplate } from '../templates/expense-rejection.template';
+import { getTaskCommentNotificationTemplate } from '../templates/task-comment-notification.template';
 
 @Injectable()
 export class EmailService {
@@ -405,6 +408,103 @@ export class EmailService {
         this.logger.error(`Failed to send meeting invitation email to ${attendee.email}:`, error);
         // Don't throw: meeting can still be created even if one email fails.
       }
+    }
+  }
+
+  async sendExpenseApproval(
+    to: string,
+    employeeName: string,
+    expenseType: string,
+    amount: number,
+    managerName: string,
+  ): Promise<void> {
+    const subject = `Expense Request Approved - ${expenseType}`;
+    const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
+    const html = getExpenseApprovalTemplate(
+      employeeName,
+      expenseType,
+      amount,
+      managerName,
+      fromEmail,
+    );
+
+    try {
+      await this.transporter.sendMail({
+        from: fromEmail,
+        to,
+        subject,
+        html,
+      });
+      this.logger.log(`Expense approval email sent to ${to} for ${employeeName}`);
+    } catch (error) {
+      this.logger.error(`Failed to send expense approval email to ${to}:`, error);
+      throw error;
+    }
+  }
+
+  async sendExpenseRejection(
+    to: string,
+    employeeName: string,
+    expenseType: string,
+    amount: number,
+    rejectionReason: string | null,
+    managerName: string,
+  ): Promise<void> {
+    const subject = `Expense Request Rejected - ${expenseType}`;
+    const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
+    const html = getExpenseRejectionTemplate(
+      employeeName,
+      expenseType,
+      amount,
+      rejectionReason,
+      managerName,
+      fromEmail,
+    );
+
+    try {
+      await this.transporter.sendMail({
+        from: fromEmail,
+        to,
+        subject,
+        html,
+      });
+      this.logger.log(`Expense rejection email sent to ${to} for ${employeeName}`);
+    } catch (error) {
+      this.logger.error(`Failed to send expense rejection email to ${to}:`, error);
+      throw error;
+    }
+  }
+
+  async sendTaskCommentNotification(
+    to: string,
+    authorName: string,
+    taskTitle: string,
+    commentContent: string,
+    projectName: string,
+    taskUrl: string,
+  ): Promise<void> {
+    const subject = `New Comment on Task: ${taskTitle}`;
+    const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
+    const html = getTaskCommentNotificationTemplate(
+      authorName,
+      taskTitle,
+      commentContent,
+      projectName,
+      taskUrl,
+      fromEmail,
+    );
+
+    try {
+      await this.transporter.sendMail({
+        from: fromEmail,
+        to,
+        subject,
+        html,
+      });
+      this.logger.log(`Task comment notification email sent to ${to} for task: ${taskTitle}`);
+    } catch (error) {
+      this.logger.error(`Failed to send task comment notification email to ${to}:`, error);
+      // Don't throw - continue with other recipients
     }
   }
 }

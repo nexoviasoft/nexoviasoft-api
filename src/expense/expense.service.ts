@@ -98,7 +98,7 @@ export class ExpenseService {
     }
 
     if (updateExpenseDto.status === ExpenseStatus.REJECTED && expense.status !== ExpenseStatus.REJECTED) {
-      return await this.reject(id, user.id);
+      return await this.reject(id, user.id, updateExpenseDto.rejectionReason);
     }
 
     Object.assign(expense, updateExpenseDto);
@@ -110,6 +110,9 @@ export class ExpenseService {
     if (expense.status === ExpenseStatus.APPROVED) {
       return expense;
     }
+
+    const approver = await this.teamRepository.findOne({ where: { id: approverId } });
+    const managerName = approver ? `${approver.firstName} ${approver.lastName}` : 'Manager';
 
     expense.status = ExpenseStatus.APPROVED;
     expense.approverId = approverId;
@@ -127,6 +130,7 @@ export class ExpenseService {
             invoiceNumber: `EXP-${expense.id}`,
             date: new Date().toLocaleDateString(),
             clientName: `${requester.firstName} ${requester.lastName}`,
+            managerName: managerName,
             items: [
               {
                 description: `Expense: ${expense.type} - ${expense.description || ''}`,
@@ -139,13 +143,13 @@ export class ExpenseService {
         });
 
         // Notify Requester
-        const subject = `Expense Request Approved - ${expense.type}`;
-        const body = `
-          <h2>Expense Approved</h2>
-          <p>Your expense request for <strong>${expense.type}</strong> of <strong>${expense.amount}</strong> has been approved.</p>
-          <p>An invoice has been generated for your records.</p>
-        `;
-        await this.emailService.sendGenericEmail(requester.email, subject, body);
+        await this.emailService.sendExpenseApproval(
+          requester.email,
+          `${requester.firstName} ${requester.lastName}`,
+          expense.type,
+          expense.amount,
+          managerName,
+        );
       }
     } catch (error) {
       this.logger.error('Failed to generate invoice or notify requester for approved expense', error);
@@ -154,22 +158,31 @@ export class ExpenseService {
     return savedExpense;
   }
 
-  async reject(id: number, approverId: number) {
+  async reject(id: number, approverId: number, rejectionReason?: string) {
     const expense = await this.findOne(id);
+    
+    const approver = await this.teamRepository.findOne({ where: { id: approverId } });
+    const managerName = approver ? `${approver.firstName} ${approver.lastName}` : 'Manager';
+
     expense.status = ExpenseStatus.REJECTED;
     expense.approverId = approverId;
+    if (rejectionReason) {
+      expense.rejectionReason = rejectionReason;
+    }
     const savedExpense = await this.expenseRepository.save(expense);
 
     // Notify Requester
     try {
       const requester = await this.teamRepository.findOne({ where: { id: expense.requesterId } });
       if (requester) {
-        const subject = `Expense Request Rejected - ${expense.type}`;
-        const body = `
-          <h2>Expense Rejected</h2>
-          <p>Your expense request for <strong>${expense.type}</strong> of <strong>${expense.amount}</strong> has been rejected.</p>
-        `;
-        await this.emailService.sendGenericEmail(requester.email, subject, body);
+        await this.emailService.sendExpenseRejection(
+          requester.email,
+          `${requester.firstName} ${requester.lastName}`,
+          expense.type,
+          expense.amount,
+          rejectionReason,
+          managerName,
+        );
       }
     } catch (error) {
       this.logger.error('Failed to notify requester for rejected expense', error);

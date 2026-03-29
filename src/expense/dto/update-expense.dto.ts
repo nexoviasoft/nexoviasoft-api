@@ -7,4 +7,7 @@ export class UpdateExpenseDto extends PartialType(CreateExpenseDto) {
   @IsEnum(ExpenseStatus)
   @IsOptional()
   status?: ExpenseStatus;
+
+  @IsOptional()
+  rejectionReason?: string;
 }

@@ -248,6 +248,17 @@ export class DocumentsService {
             Grand Total: $${total.toFixed(2)}
           </div>
         </div>
+        
+        <div style="margin-top: 50px; display: flex; justify-content: flex-end;">
+          <div style="text-align: center; border-top: 1px solid #333; min-width: 200px; padding-top: 10px;">
+            <div style="font-family: 'Brush Script MT', cursive; font-size: 24px; color: #1e293b; margin-bottom: 5px;">
+              ${data.managerName || 'Manager'}
+            </div>
+            <div style="font-size: 14px; font-weight: bold; color: #666; text-transform: uppercase; letter-spacing: 1px;">
+              Authorized Signature
+            </div>
+          </div>
+        </div>
       </body>
       </html>
     `;
