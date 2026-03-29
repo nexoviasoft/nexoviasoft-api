@@ -39,6 +39,13 @@ export function getExpenseRejectionTemplate(
 
     <p class="p">If you have any questions or would like to provide additional information, please discuss this with your manager.</p>
 
+    <div style="text-align: center; margin: 30px 0;">
+      <a href="${process.env.FRONTEND_URL || 'https://admin.nexoviasoft.com'}/expense" 
+         style="background-color: #ef4444; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
+        View Expenses
+      </a>
+    </div>
+
     <div style="margin-top: 20px; text-align: center;">
       <div style="font-family: 'Brush Script MT', cursive; font-size: 20px; color: #1e293b;">${managerName}</div>
       <div style="font-size: 12px; font-weight: bold; color: #64748b; border-top: 1px solid #e2e8f0; display: inline-block; padding-top: 4px; min-width: 150px;">Authorized Signature</div>

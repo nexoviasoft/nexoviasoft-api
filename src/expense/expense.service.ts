@@ -50,6 +50,12 @@ export class ExpenseService {
           <p><strong>Amount:</strong> ${savedExpense.amount}</p>
           <p><strong>Description:</strong> ${savedExpense.description || 'N/A'}</p>
           <p>Please log in to the admin panel to approve or reject this request.</p>
+          <div style="margin-top: 20px;">
+            <a href="${process.env.FRONTEND_URL || 'https://admin.nexoviasoft.com'}/admin/expense" 
+               style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+              Review Expense Request
+            </a>
+          </div>
         `;
         await this.emailService.sendGenericEmail(managerEmails, subject, body);
       }
