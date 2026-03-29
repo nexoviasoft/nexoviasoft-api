@@ -62,9 +62,8 @@ export class MeetingService {
         name: `${a.firstName} ${a.lastName}`.trim(),
       }));
 
-    // Try Google Meet API first; fall back to Jitsi Meet (real, working video call)
+    // Try Google Meet API first; fall back to unique meeting link if it fails
     let meetingLink: string;
-    const fallbackLink = `https://meet.jit.si/nexoviasoft-${meetingId}`;
     try {
       const end = new Date(dt.getTime() + createMeetingDto.durationMinutes * 60000);
       const meet = await this.googleCalendarService.createMeetEvent({
@@ -75,10 +74,14 @@ export class MeetingService {
         attendees: emailAttendees.map((a) => ({ email: a.email })),
       });
 
-      meetingLink = meet.meetLink ?? fallbackLink;
+      if (!meet.meetLink) {
+        throw new Error('Meet API did not return a link');
+      }
+      meetingLink = meet.meetLink;
     } catch (err: any) {
       this.logger.error(`Google Meet creation failed for ${meetingId}: ${err.message}`, err.response?.data || err);
-      meetingLink = fallbackLink;
+      // Fallback: generate a unique meeting link
+      meetingLink = `https://meet.google.com/lookup/${meetingId}`;
     }
 
     const meeting = this.meetingRepository.create({
