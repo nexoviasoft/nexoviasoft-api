@@ -21,7 +21,7 @@ export class TasksService {
     @InjectRepository(OurTeam)
     private readonly ourTeamRepository: Repository<OurTeam>,
     private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
   async create(createTaskDto: CreateTaskDto) {
     const project = await this.projectRepository.findOne({
@@ -38,7 +38,7 @@ export class TasksService {
     });
 
     const savedTask = await this.taskRepository.save(task);
-    
+
     // Update project task counts
     await this.updateProjectTaskCounts(createTaskDto.projectId);
 
@@ -78,11 +78,11 @@ export class TasksService {
           where: { projectId },
           order: { order: 'ASC', createdAt: 'DESC' },
         });
-        
+
         tasksWithoutComments.forEach(task => {
           task.comments = [];
         });
-        
+
         return tasksWithoutComments.map((task) => this.formatTaskResponse(task));
       } catch (fallbackError) {
         console.error('Fallback query also failed:', fallbackError);
@@ -119,7 +119,7 @@ export class TasksService {
 
     // Track if assignees were added (new assignees that weren't there before)
     const previousAssignees = task.assignees || [];
-    const newAssignees = updateTaskDto.assignees 
+    const newAssignees = updateTaskDto.assignees
       ? updateTaskDto.assignees.filter(assignee => !previousAssignees.includes(assignee))
       : [];
 
@@ -169,13 +169,13 @@ export class TasksService {
       'review': 'review',
       'complete': 'complete',
     };
-    
+
     if (columnToStatusMap[moveTaskDto.newColumnId]) {
       task.status = columnToStatusMap[moveTaskDto.newColumnId];
     }
 
     const updatedTask = await this.taskRepository.save(task);
-    
+
     // Update project task counts if status changed to complete or from complete
     if (task.status === 'complete' || moveTaskDto.newColumnId === 'complete') {
       await this.updateProjectTaskCounts(task.projectId);
@@ -231,35 +231,35 @@ export class TasksService {
         status: task.status || 'todo',
         columnId: task.columnId || null,
         order: task.order || 0,
-        dueDate: task.dueDate 
-          ? (task.dueDate instanceof Date 
-              ? task.dueDate.toISOString().split('T')[0] 
-              : new Date(task.dueDate).toISOString().split('T')[0])
+        dueDate: task.dueDate
+          ? (task.dueDate instanceof Date
+            ? task.dueDate.toISOString().split('T')[0]
+            : new Date(task.dueDate).toISOString().split('T')[0])
           : null,
         team: task.team || null,
         assignees: Array.isArray(task.assignees) ? task.assignees : [],
         comments: Array.isArray(task.comments)
           ? task.comments.map((comment) => ({
-              id: comment.id,
-              author: comment.author || 'Unknown',
-              content: comment.content || '',
-              mentions: Array.isArray(comment.mentions) ? comment.mentions : [],
-              createdAt: comment.createdAt 
-                ? (comment.createdAt instanceof Date 
-                    ? comment.createdAt.toISOString() 
-                    : new Date(comment.createdAt).toISOString())
-                : new Date().toISOString(),
-            }))
+            id: comment.id,
+            author: comment.author || 'Unknown',
+            content: comment.content || '',
+            mentions: Array.isArray(comment.mentions) ? comment.mentions : [],
+            createdAt: comment.createdAt
+              ? (comment.createdAt instanceof Date
+                ? comment.createdAt.toISOString()
+                : new Date(comment.createdAt).toISOString())
+              : new Date().toISOString(),
+          }))
           : [],
-        createdAt: task.createdAt 
-          ? (task.createdAt instanceof Date 
-              ? task.createdAt.toISOString() 
-              : new Date(task.createdAt).toISOString())
+        createdAt: task.createdAt
+          ? (task.createdAt instanceof Date
+            ? task.createdAt.toISOString()
+            : new Date(task.createdAt).toISOString())
           : new Date().toISOString(),
-        updatedAt: task.updatedAt 
-          ? (task.updatedAt instanceof Date 
-              ? task.updatedAt.toISOString() 
-              : new Date(task.updatedAt).toISOString())
+        updatedAt: task.updatedAt
+          ? (task.updatedAt instanceof Date
+            ? task.updatedAt.toISOString()
+            : new Date(task.updatedAt).toISOString())
           : new Date().toISOString(),
       };
     } catch (error) {
@@ -272,15 +272,15 @@ export class TasksService {
   private async findTeamMemberByInitials(initials: string): Promise<OurTeam | null> {
     try {
       const allTeamMembers = await this.ourTeamRepository.find();
-      
+
       for (const member of allTeamMembers) {
-        const memberInitials = 
+        const memberInitials =
           (member.firstName?.[0] || '') + (member.lastName?.[0] || '');
         if (memberInitials.toUpperCase() === initials.toUpperCase()) {
           return member;
         }
       }
-      
+
       return null;
     } catch (error) {
       this.logger.error(`Error finding team member by initials ${initials}:`, error);
@@ -301,7 +301,7 @@ export class TasksService {
     for (const assigneeInitials of assignees) {
       try {
         const teamMember = await this.findTeamMemberByInitials(assigneeInitials);
-        
+
         if (!teamMember || !teamMember.email) {
           this.logger.warn(
             `Could not find team member or email for initials: ${assigneeInitials}`,
@@ -309,9 +309,9 @@ export class TasksService {
           continue;
         }
 
-        const taskUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin/projects/${project.id}/tasks/${task.id}`;
-        const dueDateStr = task.dueDate 
-          ? task.dueDate.toISOString().split('T')[0] 
+        const taskUrl = `${process.env.FRONTEND_URL || 'https://admin.nexoviasoft.com'}/admin/projects/${project.id}/tasks/${task.id}`;
+        const dueDateStr = task.dueDate
+          ? task.dueDate.toISOString().split('T')[0]
           : null;
 
         await this.emailService.sendTaskAssignment(

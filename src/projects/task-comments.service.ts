@@ -17,7 +17,7 @@ export class TaskCommentsService {
     @InjectRepository(Project)
     private readonly projectRepository: Repository<Project>,
     private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
   async create(createTaskCommentDto: CreateTaskCommentDto) {
     const task = await this.taskRepository.findOne({
@@ -32,7 +32,7 @@ export class TaskCommentsService {
     const savedComment = await this.commentRepository.save(comment);
 
     // Send email notifications to all project members
-    this.sendCommentNotifications(savedComment, task).catch(err => 
+    this.sendCommentNotifications(savedComment, task).catch(err =>
       console.error('Failed to send comment notifications:', err)
     );
 
@@ -48,7 +48,7 @@ export class TaskCommentsService {
     if (!project) return;
 
     const recipients = new Set<string>();
-    
+
     // Add project lead
     if (project.projectLead?.email) {
       recipients.add(project.projectLead.email);
@@ -61,7 +61,7 @@ export class TaskCommentsService {
       });
     }
 
-    const taskUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin/projects/${project.id}/tasks/${task.id}`;
+    const taskUrl = `${process.env.FRONTEND_URL || 'https://admin.nexoviasoft.com'}/admin/projects/${project.id}/tasks/${task.id}`;
 
     for (const email of recipients) {
       // Don't send to the author if we can identify them by email

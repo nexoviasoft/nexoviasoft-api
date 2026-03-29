@@ -80,7 +80,7 @@ let OrderService = OrderService_1 = class OrderService {
                         day: 'numeric'
                     });
                 }
-                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+                const frontendUrl = process.env.FRONTEND_URL || 'https://admin.nexoviasoft.com';
                 const orderUrl = `${frontendUrl}/admin/orders/${savedOrder.id}`;
                 await this.emailService.sendOrderConfirmation(orderWithClient.client.email, orderWithClient.client.name || 'Valued Client', orderId, orderWithClient.service, Number(orderWithClient.amount), orderDate, orderUrl);
                 this.logger.log(`Order confirmation email sent to ${orderWithClient.client.email} for order ${orderId}`);
@@ -189,6 +189,6 @@ exports.OrderService = OrderService = OrderService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(order_entity_1.Order)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-        email_service_1.EmailService])
+    email_service_1.EmailService])
 ], OrderService);
 //# sourceMappingURL=order.service.js.map

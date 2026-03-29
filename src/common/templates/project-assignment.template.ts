@@ -44,7 +44,7 @@ export const getProjectAssignmentTemplate = (
         <p class="p" style="font-size: 15px; color: #475569; margin-bottom: 24px;">
           Log in to your dashboard to view the project roadmap, tasks, and start collaborating with your team.
         </p>
-        <a href="${process.env.FRONTEND_URL || 'http://localhost:3000'}/admin/projects" style="display: inline-block; background: linear-gradient(135deg, #F58220 0%, #ff9a44 100%); color: #ffffff; font-weight: 700; font-size: 16px; padding: 16px 32px; text-decoration: none; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(245, 130, 32, 0.3); transition: all 0.2s ease;">
+        <a href="${process.env.FRONTEND_URL || 'https://admin.nexoviasoft.com'}/admin/projects" style="display: inline-block; background: linear-gradient(135deg, #F58220 0%, #ff9a44 100%); color: #ffffff; font-weight: 700; font-size: 16px; padding: 16px 32px; text-decoration: none; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(245, 130, 32, 0.3); transition: all 0.2s ease;">
           Go to Dashboard
         </a>
       </div>

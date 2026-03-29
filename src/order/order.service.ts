@@ -14,7 +14,7 @@ export class OrderService {
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
     private readonly emailService: EmailService,
-  ) {}
+  ) { }
 
   async create(createOrderDto: CreateOrderDto) {
     // Generate orderId if not provided
@@ -40,7 +40,7 @@ export class OrderService {
       orderId,
       date: createOrderDto.date ? new Date(createOrderDto.date) : new Date(),
     });
-    
+
     const savedOrder = await this.orderRepository.save(order);
 
     // Load client relation to get email
@@ -55,32 +55,32 @@ export class OrderService {
         // Handle date formatting - date might be a Date object or string
         let orderDate: string;
         if (orderWithClient.date) {
-          const dateObj = orderWithClient.date instanceof Date 
-            ? orderWithClient.date 
+          const dateObj = orderWithClient.date instanceof Date
+            ? orderWithClient.date
             : new Date(orderWithClient.date);
-          
+
           if (!isNaN(dateObj.getTime())) {
-            orderDate = dateObj.toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
+            orderDate = dateObj.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
             });
           } else {
-            orderDate = new Date().toLocaleDateString('en-US', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
+            orderDate = new Date().toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
             });
           }
         } else {
-          orderDate = new Date().toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
+          orderDate = new Date().toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
           });
         }
 
-        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+        const frontendUrl = process.env.FRONTEND_URL || 'https://admin.nexoviasoft.com';
         const orderUrl = `${frontendUrl}/admin/orders/${savedOrder.id}`;
 
         await this.emailService.sendOrderConfirmation(
@@ -154,11 +154,11 @@ export class OrderService {
       where: { id },
       relations: ['client', 'category'],
     });
-    
+
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
     }
-    
+
     return order;
   }
 
@@ -167,11 +167,11 @@ export class OrderService {
       where: { orderId },
       relations: ['client', 'category'],
     });
-    
+
     if (!order) {
       throw new NotFoundException(`Order with orderId ${orderId} not found`);
     }
-    
+
     return order;
   }
 
