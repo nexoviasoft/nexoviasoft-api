@@ -10,7 +10,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GoogleCalendarService = void 0;
 const common_1 = require("@nestjs/common");
 const googleapis_1 = require("googleapis");
-const crypto_1 = require("crypto");
 let GoogleCalendarService = GoogleCalendarService_1 = class GoogleCalendarService {
     constructor() {
         this.logger = new common_1.Logger(GoogleCalendarService_1.name);
@@ -46,54 +45,35 @@ let GoogleCalendarService = GoogleCalendarService_1 = class GoogleCalendarServic
             '-----END PRIVATE KEY-----',
         ].join('\n');
     }
-    getAuth(scopes) {
-        return new googleapis_1.google.auth.GoogleAuth({
+    async createMeetEvent(data) {
+        const auth = new googleapis_1.google.auth.GoogleAuth({
             credentials: {
                 client_email: this.clientEmail,
                 private_key: this.privateKey,
             },
-            scopes,
+            scopes: ['https://www.googleapis.com/auth/meetings.space.created'],
         });
-    }
-    async createMeetEvent(data) {
-        const auth = this.getAuth(['https://www.googleapis.com/auth/calendar']);
-        const calendar = googleapis_1.google.calendar({ version: 'v3', auth });
-        const requestId = (0, crypto_1.randomUUID)();
-        const response = await calendar.events.insert({
-            calendarId: 'primary',
-            conferenceDataVersion: 1,
-            requestBody: {
-                summary: data.summary,
-                description: data.description ?? '',
-                start: { dateTime: data.start, timeZone: 'UTC' },
-                end: { dateTime: data.end, timeZone: 'UTC' },
-                conferenceData: {
-                    createRequest: {
-                        requestId,
-                        conferenceSolutionKey: { type: 'hangoutsMeet' },
-                    },
-                },
-                reminders: {
-                    useDefault: false,
-                    overrides: [
-                        { method: 'email', minutes: 24 * 60 },
-                        { method: 'popup', minutes: 15 },
-                    ],
-                },
+        const accessToken = await auth.getAccessToken();
+        this.logger.log(`Creating Google Meet space for: ${data.summary}`);
+        const res = await fetch('https://meet.googleapis.com/v2/spaces', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
             },
+            body: JSON.stringify({}),
         });
-        const event = response.data;
-        this.logger.log(`Calendar event created: ${event.id}`);
-        const meetLink = event.conferenceData?.entryPoints?.find((ep) => ep.entryPointType === 'video')?.uri ??
-            event.hangoutLink ??
-            undefined;
-        if (meetLink) {
-            this.logger.log(`Google Meet link: ${meetLink}`);
+        const text = await res.text();
+        this.logger.log(`Meet API response (${res.status}): ${text}`);
+        if (!res.ok) {
+            throw new Error(`Meet API error ${res.status}: ${text}`);
         }
-        else {
-            this.logger.warn('Calendar event created but no Meet link was returned');
+        const space = JSON.parse(text);
+        if (!space.meetingUri) {
+            throw new Error(`Meet API did not return meetingUri. Response: ${text}`);
         }
-        return { eventId: event.id ?? undefined, meetLink };
+        this.logger.log(`Google Meet link created: ${space.meetingUri}`);
+        return { meetLink: space.meetingUri };
     }
 };
 exports.GoogleCalendarService = GoogleCalendarService;

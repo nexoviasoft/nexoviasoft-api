@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { google } from 'googleapis';
-import { randomUUID } from 'crypto';
 
 @Injectable()
 export class GoogleCalendarService {
@@ -38,22 +37,10 @@ export class GoogleCalendarService {
     '-----END PRIVATE KEY-----',
   ].join('\n');
 
-  private getAuth(scopes: string[]) {
-    return new google.auth.GoogleAuth({
-      credentials: {
-        client_email: this.clientEmail,
-        private_key: this.privateKey,
-      },
-      scopes,
-    });
-  }
-
   /**
-   * Creates a Google Calendar event with a Google Meet conference attached.
-   * The Meet link is extracted from the Calendar API response's conferenceData.
-   * This approach works with Service Accounts (unlike the Meet REST API v2).
-   *
-   * Returns the real Google Meet link (e.g. https://meet.google.com/xxx-yyyy-zzz).
+   * Creates a Google Meet space via the Meet REST API v2.
+   * Returns a real meet.google.com/xxx-yyy-zzz link.
+   * No Google Calendar involvement.
    */
   async createMeetEvent(data: {
     summary: string;
@@ -62,52 +49,43 @@ export class GoogleCalendarService {
     end: string;
     attendees?: { email: string }[];
   }): Promise<{ eventId?: string; meetLink?: string }> {
-    const auth = this.getAuth(['https://www.googleapis.com/auth/calendar']);
-    const calendar = google.calendar({ version: 'v3', auth });
-
-    const requestId = randomUUID();
-
-    const response = await calendar.events.insert({
-      calendarId: 'primary',
-      conferenceDataVersion: 1,
-      // NOTE: Service Accounts cannot add attendees without Domain-Wide Delegation.
-      // We omit attendees here and send invitations via EmailService instead.
-      requestBody: {
-        summary: data.summary,
-        description: data.description ?? '',
-        start: { dateTime: data.start, timeZone: 'UTC' },
-        end: { dateTime: data.end, timeZone: 'UTC' },
-        conferenceData: {
-          createRequest: {
-            requestId,
-            conferenceSolutionKey: { type: 'hangoutsMeet' },
-          },
-        },
-        reminders: {
-          useDefault: false,
-          overrides: [
-            { method: 'email', minutes: 24 * 60 },
-            { method: 'popup', minutes: 15 },
-          ],
-        },
+    // Get an access token using the service account
+    const auth = new google.auth.GoogleAuth({
+      credentials: {
+        client_email: this.clientEmail,
+        private_key: this.privateKey,
       },
+      scopes: ['https://www.googleapis.com/auth/meetings.space.created'],
     });
 
-    const event = response.data;
-    this.logger.log(`Calendar event created: ${event.id}`);
+    const accessToken = await auth.getAccessToken();
 
-    // Extract the Google Meet link from the conferenceData returned by the API
-    const meetLink =
-      event.conferenceData?.entryPoints?.find((ep) => ep.entryPointType === 'video')?.uri ??
-      event.hangoutLink ??
-      undefined;
+    this.logger.log(`Creating Google Meet space for: ${data.summary}`);
 
-    if (meetLink) {
-      this.logger.log(`Google Meet link: ${meetLink}`);
-    } else {
-      this.logger.warn('Calendar event created but no Meet link was returned');
+    const res = await fetch('https://meet.googleapis.com/v2/spaces', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    });
+
+    const text = await res.text();
+    this.logger.log(`Meet API response (${res.status}): ${text}`);
+
+    if (!res.ok) {
+      throw new Error(`Meet API error ${res.status}: ${text}`);
     }
 
-    return { eventId: event.id ?? undefined, meetLink };
+    const space = JSON.parse(text) as { name?: string; meetingUri?: string; meetingCode?: string };
+
+    if (!space.meetingUri) {
+      throw new Error(`Meet API did not return meetingUri. Response: ${text}`);
+    }
+
+    this.logger.log(`Google Meet link created: ${space.meetingUri}`);
+
+    return { meetLink: space.meetingUri };
   }
 }

@@ -2,7 +2,6 @@ export declare class GoogleCalendarService {
     private readonly logger;
     private readonly clientEmail;
     private readonly privateKey;
-    private getAuth;
     createMeetEvent(data: {
         summary: string;
         description?: string;
