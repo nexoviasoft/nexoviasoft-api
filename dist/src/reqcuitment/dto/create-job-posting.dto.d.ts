@@ -6,7 +6,10 @@ export declare class CreateJobPostingDto {
     location: string;
     status?: string;
     applicants?: number;
+    vacancy?: number;
     postedDate?: string;
+    startDate?: string;
+    expiryDate?: string;
     description?: string;
     imageUrl?: string;
 }

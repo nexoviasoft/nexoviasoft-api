@@ -21,12 +21,14 @@ const imagebb_service_1 = require("../common/services/imagebb.service");
 const job_posting_entity_1 = require("./entities/job-posting.entity");
 const candidate_entity_1 = require("./entities/candidate.entity");
 const interview_entity_1 = require("./entities/interview.entity");
+const email_service_1 = require("../common/services/email.service");
 let ReqcuitmentService = ReqcuitmentService_1 = class ReqcuitmentService {
-    constructor(jobPostingRepository, candidateRepository, interviewRepository, imageBBService) {
+    constructor(jobPostingRepository, candidateRepository, interviewRepository, imageBBService, emailService) {
         this.jobPostingRepository = jobPostingRepository;
         this.candidateRepository = candidateRepository;
         this.interviewRepository = interviewRepository;
         this.imageBBService = imageBBService;
+        this.emailService = emailService;
         this.logger = new common_1.Logger(ReqcuitmentService_1.name);
     }
     async createJobPosting(createJobPostingDto) {
@@ -35,6 +37,13 @@ let ReqcuitmentService = ReqcuitmentService_1 = class ReqcuitmentService {
             postedDate: createJobPostingDto.postedDate
                 ? new Date(createJobPostingDto.postedDate)
                 : new Date(),
+            startDate: createJobPostingDto.startDate
+                ? new Date(createJobPostingDto.startDate)
+                : null,
+            expiryDate: createJobPostingDto.expiryDate
+                ? new Date(createJobPostingDto.expiryDate)
+                : null,
+            vacancy: createJobPostingDto.vacancy ?? 1,
         });
         return this.jobPostingRepository.save(jobPosting);
     }
@@ -61,6 +70,13 @@ let ReqcuitmentService = ReqcuitmentService_1 = class ReqcuitmentService {
             postedDate: updateJobPostingDto.postedDate
                 ? new Date(updateJobPostingDto.postedDate)
                 : jobPosting.postedDate,
+            startDate: updateJobPostingDto.startDate
+                ? new Date(updateJobPostingDto.startDate)
+                : jobPosting.startDate,
+            expiryDate: updateJobPostingDto.expiryDate
+                ? new Date(updateJobPostingDto.expiryDate)
+                : jobPosting.expiryDate,
+            vacancy: updateJobPostingDto.vacancy ?? jobPosting.vacancy,
         });
         return this.jobPostingRepository.save(jobPosting);
     }
@@ -81,6 +97,8 @@ let ReqcuitmentService = ReqcuitmentService_1 = class ReqcuitmentService {
         const candidate = this.candidateRepository.create({
             ...createCandidateDto,
             cvUrl,
+            cvData: createCandidateDto.cvData,
+            cvFilename: createCandidateDto.cvFilename,
             appliedDate: createCandidateDto.appliedDate
                 ? new Date(createCandidateDto.appliedDate)
                 : new Date(),
@@ -140,8 +158,34 @@ let ReqcuitmentService = ReqcuitmentService_1 = class ReqcuitmentService {
         const interview = this.interviewRepository.create({
             ...createInterviewDto,
             date: new Date(createInterviewDto.date),
+            meetLink: createInterviewDto.meetLink,
         });
-        return this.interviewRepository.save(interview);
+        const savedInterview = await this.interviewRepository.save(interview);
+        if (createInterviewDto.candidateId) {
+            const candidate = await this.candidateRepository.findOneBy({ id: createInterviewDto.candidateId });
+            if (candidate) {
+                await this.sendInterviewInvitationEmail(candidate, savedInterview);
+            }
+        }
+        return savedInterview;
+    }
+    async createBulkInterviews(createInterviewDto, candidateIds) {
+        const interviews = await Promise.all(candidateIds.map(async (id) => {
+            const candidate = await this.candidateRepository.findOneBy({ id });
+            if (!candidate)
+                return null;
+            const interview = this.interviewRepository.create({
+                ...createInterviewDto,
+                candidate: candidate.name,
+                candidateId: candidate.id,
+                date: new Date(createInterviewDto.date),
+            });
+            const savedInterview = await this.interviewRepository.save(interview);
+            await this.sendInterviewInvitationEmail(candidate, savedInterview);
+            return savedInterview;
+        }));
+        const validInterviews = interviews.filter(i => i !== null);
+        return validInterviews;
     }
     async findAllInterviews() {
         return this.interviewRepository.find({
@@ -188,6 +232,30 @@ let ReqcuitmentService = ReqcuitmentService_1 = class ReqcuitmentService {
     remove(id) {
         return `This action removes a #${id} reqcuitment`;
     }
+    async sendInterviewInvitationEmail(candidate, interview) {
+        const dateFormatted = new Date(interview.date).toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+        });
+        try {
+            await this.emailService.sendInterviewInvitation({
+                to: candidate.email,
+                candidateName: candidate.name,
+                position: interview.position,
+                type: interview.type,
+                date: dateFormatted,
+                time: interview.time,
+                interviewer: interview.interviewer,
+                meetLink: interview.meetLink,
+            });
+            this.logger.log(`Interview invitation email sent to candidate ${candidate.name} (${candidate.email}) for interview ID ${interview.id}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send interview invitation email to ${candidate.email} (Candidate ID: ${candidate.id}): ${error.message}`);
+        }
+    }
 };
 exports.ReqcuitmentService = ReqcuitmentService;
 exports.ReqcuitmentService = ReqcuitmentService = ReqcuitmentService_1 = __decorate([
@@ -198,6 +266,7 @@ exports.ReqcuitmentService = ReqcuitmentService = ReqcuitmentService_1 = __decor
     __metadata("design:paramtypes", [typeorm_2.Repository,
         typeorm_2.Repository,
         typeorm_2.Repository,
-        imagebb_service_1.ImageBBService])
+        imagebb_service_1.ImageBBService,
+        email_service_1.EmailService])
 ], ReqcuitmentService);
 //# sourceMappingURL=reqcuitment.service.js.map

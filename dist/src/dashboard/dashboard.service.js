@@ -65,24 +65,24 @@ let DashboardService = class DashboardService {
             };
         }
         if (t === 'finance') {
-            const orders = await this.orderRepository.find({
-                relations: ['client'],
+            const incomes = await this.orderRepository.manager.getRepository('Income').find({
+                relations: ['client', 'order'],
                 order: { createdAt: 'DESC' },
                 take: 8,
             });
             return {
                 tab: 'Finance',
-                items: orders.map((o) => ({
-                    id: o.id,
-                    orderId: o.orderId,
-                    service: o.service,
-                    amount: Number(o.amount || 0),
-                    status: o.status,
-                    createdAt: o.createdAt,
-                    client: o.client
+                items: incomes.map((i) => ({
+                    id: i.id,
+                    orderId: i.order?.orderId || 'Standalone',
+                    service: i.order?.service || i.description || 'Income',
+                    amount: Number(i.amount || 0),
+                    status: 'Completed',
+                    createdAt: i.createdAt,
+                    client: i.client
                         ? {
-                            id: o.client.id,
-                            name: o.client.name,
+                            id: i.client.id,
+                            name: i.client.name,
                         }
                         : null,
                 })),
@@ -131,14 +131,14 @@ let DashboardService = class DashboardService {
     async getSummary(_user) {
         const now = new Date();
         const activeCustomersSince = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        const [totalCustomers, activeCustomers, orderAmounts, payrollTotals, expenseTotals, attendanceRows, nextMeeting] = await Promise.all([
+        const [totalCustomers, activeCustomers, incomeRecords, payrollTotals, expenseTotals, attendanceRows, nextMeeting] = await Promise.all([
             this.clientRepository.count(),
             this.orderRepository
                 .createQueryBuilder('o')
                 .select('COUNT(DISTINCT o.clientId)', 'count')
                 .where('o.createdAt >= :since', { since: activeCustomersSince.toISOString() })
                 .getRawOne(),
-            this.orderRepository.find({ select: ['amount'] }),
+            this.orderRepository.manager.getRepository('Income').find({ select: ['amount'] }),
             this.payrollRepository
                 .createQueryBuilder('p')
                 .select('COALESCE(SUM(p.netPay), 0)', 'totalCost')
@@ -158,7 +158,7 @@ let DashboardService = class DashboardService {
                 order: { dateTime: 'ASC' },
             }),
         ]);
-        const revenueTotal = orderAmounts.reduce((sum, o) => sum + Number(o.amount || 0), 0);
+        const revenueTotal = incomeRecords.reduce((sum, i) => sum + Number(i.amount || 0), 0);
         const payrollExpense = Number(payrollTotals?.totalCost ?? 0);
         const additionalExpense = Number(expenseTotals?.totalAmount ?? 0);
         const expenseTotal = payrollExpense + additionalExpense;
@@ -352,11 +352,12 @@ let DashboardService = class DashboardService {
             format = 'YYYY-MM';
             interval = 'month';
         }
-        const incomeRows = await this.orderRepository
-            .createQueryBuilder('o')
-            .select(`TO_CHAR(DATE_TRUNC('${interval}', "o"."createdAt"), '${format}')`, 'key')
-            .addSelect(`COALESCE(SUM("o"."amount"), 0)`, 'amount')
-            .where('o.createdAt >= :start', { start: start.toISOString() })
+        const incomeRows = await this.orderRepository.manager
+            .getRepository('Income')
+            .createQueryBuilder('i')
+            .select(`TO_CHAR(DATE_TRUNC('${interval}', "i"."createdAt"), '${format}')`, 'key')
+            .addSelect(`COALESCE(SUM("i"."amount"), 0)`, 'amount')
+            .where('i.createdAt >= :start', { start: start.toISOString() })
             .groupBy('key')
             .getRawMany();
         const payrollRows = await this.payrollRepository

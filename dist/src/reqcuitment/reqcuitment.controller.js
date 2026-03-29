@@ -111,6 +111,14 @@ let ReqcuitmentController = class ReqcuitmentController {
             data,
         };
     }
+    async createBulkInterviews(body) {
+        const data = await this.reqcuitmentService.createBulkInterviews(body.interview, body.candidateIds);
+        return {
+            statusCode: common_1.HttpStatus.CREATED,
+            message: `${data.length} interviews scheduled successfully`,
+            data,
+        };
+    }
     async findAllInterviews() {
         const data = await this.reqcuitmentService.findAllInterviews();
         return {
@@ -232,6 +240,14 @@ __decorate([
     __metadata("design:paramtypes", [create_interview_dto_1.CreateInterviewDto]),
     __metadata("design:returntype", Promise)
 ], ReqcuitmentController.prototype, "createInterview", null);
+__decorate([
+    (0, common_1.Post)('interviews/bulk'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], ReqcuitmentController.prototype, "createBulkInterviews", null);
 __decorate([
     (0, common_1.Get)('interviews'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),

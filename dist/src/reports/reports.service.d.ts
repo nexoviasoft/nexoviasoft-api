@@ -44,6 +44,6 @@ export declare class ReportsService {
     private formatCurrency;
     private formatSignedPercent;
     private parseWorkHoursToMinutes;
-    private groupOrdersByMonth;
+    private groupIncomesByMonth;
     private buildTaskDistribution;
 }

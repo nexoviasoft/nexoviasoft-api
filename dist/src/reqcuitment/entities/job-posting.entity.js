@@ -54,9 +54,21 @@ __decorate([
     __metadata("design:type", Number)
 ], JobPosting.prototype, "applicants", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: 1 }),
+    __metadata("design:type", Number)
+], JobPosting.prototype, "vacancy", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'date', nullable: true }),
     __metadata("design:type", Date)
 ], JobPosting.prototype, "postedDate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'date', nullable: true }),
+    __metadata("design:type", Date)
+], JobPosting.prototype, "startDate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'date', nullable: true }),
+    __metadata("design:type", Date)
+], JobPosting.prototype, "expiryDate", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'text', nullable: true }),
     __metadata("design:type", String)

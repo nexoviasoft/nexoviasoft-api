@@ -9,12 +9,14 @@ import { CreateCandidateDto } from './dto/create-candidate.dto';
 import { UpdateCandidateDto } from './dto/update-candidate.dto';
 import { CreateInterviewDto } from './dto/create-interview.dto';
 import { UpdateInterviewDto } from './dto/update-interview.dto';
+import { EmailService } from '../common/services/email.service';
 export declare class ReqcuitmentService {
     private readonly jobPostingRepository;
     private readonly candidateRepository;
     private readonly interviewRepository;
     private readonly imageBBService;
-    constructor(jobPostingRepository: Repository<JobPosting>, candidateRepository: Repository<Candidate>, interviewRepository: Repository<Interview>, imageBBService: ImageBBService);
+    private readonly emailService;
+    constructor(jobPostingRepository: Repository<JobPosting>, candidateRepository: Repository<Candidate>, interviewRepository: Repository<Interview>, imageBBService: ImageBBService, emailService: EmailService);
     private readonly logger;
     createJobPosting(createJobPostingDto: CreateJobPostingDto): Promise<JobPosting>;
     findAllJobPostings(): Promise<JobPosting[]>;
@@ -27,6 +29,7 @@ export declare class ReqcuitmentService {
     updateCandidate(id: number, updateCandidateDto: UpdateCandidateDto): Promise<Candidate>;
     removeCandidate(id: number): Promise<Candidate>;
     createInterview(createInterviewDto: CreateInterviewDto): Promise<Interview>;
+    createBulkInterviews(createInterviewDto: CreateInterviewDto, candidateIds: number[]): Promise<Interview[]>;
     findAllInterviews(): Promise<Interview[]>;
     findOneInterview(id: number): Promise<Interview>;
     updateInterview(id: number, updateInterviewDto: UpdateInterviewDto): Promise<Interview>;
@@ -36,4 +39,5 @@ export declare class ReqcuitmentService {
     findOne(id: number): string;
     update(id: number, updateReqcuitmentDto: any): string;
     remove(id: number): string;
+    private sendInterviewInvitationEmail;
 }

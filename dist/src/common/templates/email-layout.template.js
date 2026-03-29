@@ -25,12 +25,15 @@ function renderEmailLayout(params) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${title}</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
     body {
       margin: 0;
       padding: 0;
-      background: #eef2f8;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-      color: #0f172a;
+      background-color: #f3f4f6;
+      font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      color: #111827;
+      -webkit-font-smoothing: antialiased;
     }
     .preheader {
       display: none;
@@ -42,140 +45,214 @@ function renderEmailLayout(params) {
     }
     .wrap {
       width: 100%;
-      padding: 24px 12px;
+      padding: 40px 15px;
+      box-sizing: border-box;
     }
     .card {
-      max-width: 680px;
+      max-width: 600px;
       margin: 0 auto;
       background: #ffffff;
-      border: 1px solid #dbe3ef;
-      border-radius: 18px;
+      border-radius: 32px;
       overflow: hidden;
-      box-shadow: 0 14px 38px rgba(15, 23, 42, 0.09);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(229, 231, 235, 0.5);
     }
     .hero {
-      background: linear-gradient(135deg, ${accent}, #0f172a);
-      padding: 30px 28px;
+      background: linear-gradient(135deg, ${accent} 0%, #1e293b 100%);
+      padding: 60px 40px;
       color: #ffffff;
+      text-align: center;
+      position: relative;
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, transparent 60%);
+    }
+    .logo-container {
+      margin-bottom: 32px;
+      position: relative;
+    }
+    .logo-box {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      font-weight: 800;
+      font-size: 24px;
+      color: white;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
     }
     .eyebrow {
       display: inline-block;
-      background: rgba(255, 255, 255, 0.17);
-      border: 1px solid rgba(255, 255, 255, 0.34);
-      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(4px);
+      padding: 8px 16px;
       border-radius: 999px;
-      font-size: 12px;
-      letter-spacing: 0.04em;
+      font-size: 11px;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      font-weight: 700;
-      margin-bottom: 12px;
+      font-weight: 800;
+      margin-bottom: 24px;
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
     .hero h1 {
       margin: 0;
-      font-size: 30px;
-      line-height: 1.2;
-      letter-spacing: -0.02em;
+      font-size: 36px;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      position: relative;
     }
     .hero p {
-      margin: 10px 0 0;
-      color: rgba(255, 255, 255, 0.92);
-      font-size: 15px;
+      margin: 20px 0 0;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 18px;
       line-height: 1.6;
+      font-weight: 500;
+      max-width: 440px;
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
     }
     .body {
-      padding: 26px;
+      padding: 48px 40px;
       background: #ffffff;
     }
     .p {
-      margin: 0 0 12px;
-      font-size: 15px;
-      line-height: 1.65;
-      color: #1e293b;
+      margin: 0 0 1.5rem;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #374151;
     }
     .box {
-      border: 1px solid #dbe3ef;
-      background: #f8fbff;
-      border-radius: 12px;
-      padding: 16px;
-      margin: 16px 0;
+      border: 1px solid #f3f4f6;
+      background: #f9fafb;
+      border-radius: 24px;
+      padding: 32px;
+      margin: 32px 0;
+      transition: all 0.3s ease;
     }
     .box-title {
-      margin: 0 0 10px;
-      font-size: 14px;
-      letter-spacing: 0.02em;
+      margin: 0 0 20px;
+      font-size: 12px;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: #334155;
-      font-weight: 700;
+      color: #6b7280;
+      font-weight: 800;
     }
     .kvs {
       width: 100%;
       border-collapse: collapse;
-      margin: 4px 0 0;
     }
     .kvs td {
-      padding: 9px 0;
-      vertical-align: top;
-      border-bottom: 1px solid #e8eef7;
-      font-size: 14px;
+      padding: 14px 0;
+      vertical-align: middle;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 15px;
     }
     .kvs tr:last-child td {
       border-bottom: 0;
     }
     .key {
-      width: 150px;
-      color: #475569;
+      width: 40%;
+      color: #6b7280;
       font-weight: 600;
     }
     .value {
-      color: #0f172a;
-      font-weight: 500;
+      color: #111827;
+      font-weight: 700;
+      text-align: right;
     }
     .badge {
-      display: inline-block;
-      padding: 4px 10px;
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 14px;
       border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      border: 1px solid #c9d7ea;
-      background: #edf4ff;
-      color: #0f3f7f;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
+    }
+    .badge-success {
+      background-color: #ecfdf5;
+      color: #059669;
+    }
+    .badge-error {
+      background-color: #fef2f2;
+      color: #dc2626;
     }
     .cta {
       display: inline-block;
-      margin: 12px 0 4px;
-      text-decoration: none;
-      background: ${accent};
+      margin-top: 32px;
+      text-decoration: none !important;
+      background: linear-gradient(135deg, ${accent} 0%, #000000 100%);
       color: #ffffff !important;
-      border-radius: 10px;
-      padding: 11px 16px;
-      font-size: 14px;
+      border-radius: 16px;
+      padding: 18px 36px;
+      font-size: 16px;
       font-weight: 700;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-    }
-    .note {
-      margin-top: 16px;
-      background: #fff8e8;
-      border: 1px solid #f7d9a2;
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 13px;
-      color: #8a5b10;
-      line-height: 1.6;
+      text-align: center;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
     .footer {
-      background: #f8fafc;
-      border-top: 1px solid #dbe3ef;
-      padding: 18px 26px;
-      color: #64748b;
-      font-size: 12px;
-      line-height: 1.7;
+      background: #ffffff;
+      border-top: 1px solid #f3f4f6;
+      padding: 40px;
+      color: #9ca3af;
+      font-size: 13px;
+      line-height: 1.8;
+      text-align: center;
     }
     .footer a {
-      color: #1f7ae0;
+      color: ${accent};
       text-decoration: none;
+      font-weight: 700;
+    }
+    .social-links {
+      margin-top: 24px;
+      margin-bottom: 24px;
+    }
+    .social-icon {
+      display: inline-block;
+      margin: 0 8px;
+      width: 32px;
+      height: 32px;
+      background: #f3f4f6;
+      border-radius: 10px;
+      line-height: 32px;
+      color: #4b5563;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .signature-area {
+      margin-top: 48px;
+      text-align: left;
+      border-left: 2px solid ${accent};
+      padding-left: 20px;
+    }
+    .signature-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 2px;
+    }
+    .signature-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
       font-weight: 600;
+      color: #6b7280;
     }
   </style>
 </head>
@@ -184,6 +261,9 @@ function renderEmailLayout(params) {
   <div class="wrap">
     <div class="card">
       <div class="hero">
+        <div class="logo-container">
+          <div class="logo-box">NS</div>
+        </div>
         ${eyebrow ? `<span class="eyebrow">${eyebrow}</span>` : ''}
         <h1>${title}</h1>
         ${subtitle ? `<p>${subtitle}</p>` : ''}
@@ -192,9 +272,12 @@ function renderEmailLayout(params) {
         ${contentHtml}
       </div>
       <div class="footer">
-        <div>${footerNote || 'This is an automated email from NexoviaSoft. Please do not reply to this message.'}</div>
-        ${contactEmail ? `<div>Support: <a href="mailto:${contactEmail}">${contactEmail}</a></div>` : ''}
-        <div>&copy; ${new Date().getFullYear()} NexoviaSoft. All rights reserved.</div>
+        <div style="margin-bottom: 20px;">
+          <img src="https://nexoviasoft.com/logo.png" alt="NexoviaSoft Logo" width="120" style="opacity: 0.5;" onerror="this.style.display='none'"/>
+        </div>
+        <div style="margin-bottom: 12px;">${footerNote || 'This is an automated notification from NexoviaSoft. Please do not reply directly to this email.'}</div>
+        ${contactEmail ? `<div style="margin-bottom: 12px;">Questions? Reach us at <a href="mailto:${contactEmail}">${contactEmail}</a></div>` : ''}
+        <div style="font-size: 12px; color: #d1d5db; margin-top: 20px;">&copy; ${new Date().getFullYear()} NexoviaSoft. 123 Tech Avenue, Innovation City. All rights reserved.</div>
       </div>
     </div>
   </div>

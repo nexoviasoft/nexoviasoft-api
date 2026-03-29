@@ -145,13 +145,13 @@ let OrderService = OrderService_1 = class OrderService {
         return order;
     }
     async getStats() {
-        const [total, inProgress, completed, allOrders] = await Promise.all([
+        const [total, inProgress, completed, incomeRecords] = await Promise.all([
             this.orderRepository.count(),
             this.orderRepository.count({ where: { status: order_entity_1.OrderStatus.IN_PROGRESS } }),
             this.orderRepository.count({ where: { status: order_entity_1.OrderStatus.COMPLETED } }),
-            this.orderRepository.find({ select: ['amount'] }),
+            this.orderRepository.manager.getRepository('Income').find({ select: ['amount'] }),
         ]);
-        const totalRevenue = allOrders.reduce((sum, order) => sum + Number(order.amount || 0), 0);
+        const totalRevenue = incomeRecords.reduce((sum, income) => sum + Number(income.amount || 0), 0);
         return {
             total,
             inProgress,
@@ -189,6 +189,6 @@ exports.OrderService = OrderService = OrderService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(order_entity_1.Order)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-    email_service_1.EmailService])
+        email_service_1.EmailService])
 ], OrderService);
 //# sourceMappingURL=order.service.js.map

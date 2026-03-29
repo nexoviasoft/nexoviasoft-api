@@ -12,12 +12,13 @@ const typeorm_1 = require("@nestjs/typeorm");
 const schedule_service_1 = require("./schedule.service");
 const schedule_controller_1 = require("./schedule.controller");
 const schedule_entity_1 = require("./entities/schedule.entity");
+const our_team_entity_1 = require("../setting/home/our-team/entities/our-team.entity");
 let ScheduleModule = class ScheduleModule {
 };
 exports.ScheduleModule = ScheduleModule;
 exports.ScheduleModule = ScheduleModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([schedule_entity_1.Schedule])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([schedule_entity_1.Schedule, our_team_entity_1.OurTeam])],
         controllers: [schedule_controller_1.ScheduleController],
         providers: [schedule_service_1.ScheduleService],
     })

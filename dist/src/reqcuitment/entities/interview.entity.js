@@ -48,6 +48,10 @@ __decorate([
     __metadata("design:type", String)
 ], Interview.prototype, "status", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Interview.prototype, "meetLink", void 0);
+__decorate([
     (0, typeorm_1.ManyToOne)(() => candidate_entity_1.Candidate, (candidate) => candidate.interviews, { nullable: true }),
     (0, typeorm_1.JoinColumn)({ name: 'candidateId' }),
     __metadata("design:type", candidate_entity_1.Candidate)

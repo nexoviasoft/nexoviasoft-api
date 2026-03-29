@@ -9,6 +9,7 @@ export declare class TaskCommentsController {
         author: string;
         content: string;
         mentions: string[];
+        parentId: number;
         createdAt: Date;
     }>;
     findAll(taskId: string): Promise<{
@@ -17,6 +18,7 @@ export declare class TaskCommentsController {
         author: string;
         content: string;
         mentions: string[];
+        parentId: number;
         createdAt: Date;
     }[]>;
     findOne(id: number): Promise<{
@@ -25,6 +27,7 @@ export declare class TaskCommentsController {
         author: string;
         content: string;
         mentions: string[];
+        parentId: number;
         createdAt: Date;
     }>;
     remove(id: number): Promise<{

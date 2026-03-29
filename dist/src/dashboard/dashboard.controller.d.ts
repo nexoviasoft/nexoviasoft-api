@@ -106,11 +106,11 @@ export declare class DashboardController {
         } | {
             tab: string;
             items: {
-                id: number;
+                id: any;
                 orderId: any;
                 service: any;
                 amount: number;
-                status: any;
+                status: string;
                 createdAt: any;
                 client: {
                     id: any;

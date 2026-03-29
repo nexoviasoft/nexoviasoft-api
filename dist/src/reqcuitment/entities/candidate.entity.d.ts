@@ -17,4 +17,6 @@ export declare class Candidate {
     createdAt: Date;
     updatedAt: Date;
     cvUrl: string;
+    cvData: string;
+    cvFilename: string;
 }

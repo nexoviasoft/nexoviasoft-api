@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var MeetingController_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MeetingController = void 0;
 const common_1 = require("@nestjs/common");
@@ -18,11 +19,13 @@ const passport_1 = require("@nestjs/passport");
 const meeting_service_1 = require("./meeting.service");
 const create_meeting_dto_1 = require("./dto/create-meeting.dto");
 const update_meeting_dto_1 = require("./dto/update-meeting.dto");
-let MeetingController = class MeetingController {
+let MeetingController = MeetingController_1 = class MeetingController {
     constructor(meetingService) {
         this.meetingService = meetingService;
+        this.logger = new common_1.Logger(MeetingController_1.name);
     }
     create(createMeetingDto) {
+        this.logger.log('Creating meeting with payload:', JSON.stringify(createMeetingDto));
         return this.meetingService.create(createMeetingDto);
     }
     findAll() {
@@ -74,7 +77,7 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], MeetingController.prototype, "remove", null);
-exports.MeetingController = MeetingController = __decorate([
+exports.MeetingController = MeetingController = MeetingController_1 = __decorate([
     (0, common_1.Controller)('meeting'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     __metadata("design:paramtypes", [meeting_service_1.MeetingService])

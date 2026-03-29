@@ -20,6 +20,7 @@ export declare class Expense {
     requesterId: number;
     approver: OurTeam;
     approverId: number;
+    rejectionReason: string;
     createdAt: Date;
     updatedAt: Date;
 }

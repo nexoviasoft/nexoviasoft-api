@@ -1,10 +1,8 @@
 export declare class GoogleCalendarService {
     private readonly logger;
-    private readonly calendar;
-    private readonly calendarId;
-    private lastRequestTime;
-    private requestQueue;
-    constructor();
+    private readonly clientEmail;
+    private readonly privateKey;
+    private getAuth;
     createMeetEvent(data: {
         summary: string;
         description?: string;
@@ -17,6 +15,4 @@ export declare class GoogleCalendarService {
         eventId?: string;
         meetLink?: string;
     }>;
-    private scheduleRequest;
-    private executeWithBackoff;
 }

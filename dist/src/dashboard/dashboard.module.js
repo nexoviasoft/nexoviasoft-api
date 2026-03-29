@@ -19,6 +19,8 @@ const our_client_entity_1 = require("../setting/our-client/entities/our-client.e
 const dashboard_controller_1 = require("./dashboard.controller");
 const dashboard_service_1 = require("./dashboard.service");
 const expense_entity_1 = require("../expense/entities/expense.entity");
+const our_team_entity_1 = require("../setting/home/our-team/entities/our-team.entity");
+const department_entity_1 = require("../setting/department/entities/department.entity");
 let DashboardModule = class DashboardModule {
 };
 exports.DashboardModule = DashboardModule;
@@ -34,6 +36,8 @@ exports.DashboardModule = DashboardModule = __decorate([
                 meeting_entity_1.Meeting,
                 schedule_entity_1.Schedule,
                 expense_entity_1.Expense,
+                our_team_entity_1.OurTeam,
+                department_entity_1.Department,
             ]),
         ],
         controllers: [dashboard_controller_1.DashboardController],

@@ -8,6 +8,7 @@ export declare class Interview {
     interviewer: string;
     type: string;
     status: string;
+    meetLink?: string;
     candidateEntity: Candidate;
     candidateId: number;
     createdAt: Date;

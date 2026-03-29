@@ -48,6 +48,7 @@ let MeetingService = MeetingService_1 = class MeetingService {
     }
     async create(createMeetingDto) {
         const dt = new Date(createMeetingDto.dateTime);
+        this.logger.log(`Parsed dateTime: ${dt.toISOString()} from ${createMeetingDto.dateTime}`);
         if (Number.isNaN(dt.getTime())) {
             throw new common_1.BadRequestException('Invalid dateTime');
         }
@@ -62,25 +63,19 @@ let MeetingService = MeetingService_1 = class MeetingService {
             email: a.email,
             name: `${a.firstName} ${a.lastName}`.trim(),
         }));
-        let meetingLink;
-        try {
-            const end = new Date(dt.getTime() + createMeetingDto.durationMinutes * 60000);
-            const meet = await this.googleCalendarService.createMeetEvent({
-                summary: createMeetingDto.topic,
-                description: createMeetingDto.description,
-                start: dt.toISOString(),
-                end: end.toISOString(),
-                attendees: emailAttendees.map((a) => ({ email: a.email })),
-            });
-            if (!meet.meetLink) {
-                throw new Error('Google Calendar did not return a Meet link');
-            }
-            meetingLink = meet.meetLink;
+        const end = new Date(dt.getTime() + createMeetingDto.durationMinutes * 60000);
+        const meet = await this.googleCalendarService.createMeetEvent({
+            summary: createMeetingDto.topic,
+            description: createMeetingDto.description,
+            start: dt.toISOString(),
+            end: end.toISOString(),
+            attendees: emailAttendees.map((a) => ({ email: a.email })),
+        });
+        if (!meet.meetLink) {
+            this.logger.error(`Google Meet link not returned for ${meetingId}`);
+            throw new common_1.BadRequestException('Google Meet link generation failed. Please try again.');
         }
-        catch (err) {
-            this.logger.error(`Google Meet event creation failed for ${meetingId}`, err);
-            throw new common_1.BadRequestException('Failed to create Google Meet link');
-        }
+        const meetingLink = meet.meetLink;
         const meeting = this.meetingRepository.create({
             meetingId,
             meetingLink,

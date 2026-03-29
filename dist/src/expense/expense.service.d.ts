@@ -17,6 +17,6 @@ export declare class ExpenseService {
     findOne(id: number): Promise<Expense>;
     update(id: number, updateExpenseDto: UpdateExpenseDto, user: any): Promise<Expense>;
     approve(id: number, approverId: number): Promise<Expense>;
-    reject(id: number, approverId: number): Promise<Expense>;
+    reject(id: number, approverId: number, rejectionReason?: string): Promise<Expense>;
     remove(id: number): Promise<Expense>;
 }

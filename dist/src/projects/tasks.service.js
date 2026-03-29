@@ -265,8 +265,8 @@ exports.TasksService = TasksService = TasksService_1 = __decorate([
     __param(1, (0, typeorm_1.InjectRepository)(project_entity_1.Project)),
     __param(2, (0, typeorm_1.InjectRepository)(our_team_entity_1.OurTeam)),
     __metadata("design:paramtypes", [typeorm_2.Repository,
-    typeorm_2.Repository,
-    typeorm_2.Repository,
-    email_service_1.EmailService])
+        typeorm_2.Repository,
+        typeorm_2.Repository,
+        email_service_1.EmailService])
 ], TasksService);
 //# sourceMappingURL=tasks.service.js.map

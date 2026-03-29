@@ -19,6 +19,7 @@ export declare class Order {
     progress: number;
     assignedTo: string[];
     date: Date;
+    paidAmount: number;
     createdAt: Date;
     updatedAt: Date;
 }

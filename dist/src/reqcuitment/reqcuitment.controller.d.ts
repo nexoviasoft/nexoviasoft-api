@@ -62,6 +62,14 @@ export declare class ReqcuitmentController {
         message: string;
         data: import("./entities/interview.entity").Interview;
     }>;
+    createBulkInterviews(body: {
+        interview: CreateInterviewDto;
+        candidateIds: number[];
+    }): Promise<{
+        statusCode: HttpStatus;
+        message: string;
+        data: import("./entities/interview.entity").Interview[];
+    }>;
     findAllInterviews(): Promise<{
         statusCode: HttpStatus;
         message: string;

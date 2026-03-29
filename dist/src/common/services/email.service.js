@@ -56,6 +56,11 @@ const document_email_template_1 = require("../templates/document-email.template"
 const meeting_invitation_template_1 = require("../templates/meeting-invitation.template");
 const team_member_credentials_template_1 = require("../templates/team-member-credentials.template");
 const project_assignment_template_1 = require("../templates/project-assignment.template");
+const expense_approval_template_1 = require("../templates/expense-approval.template");
+const expense_rejection_template_1 = require("../templates/expense-rejection.template");
+const task_comment_notification_template_1 = require("../templates/task-comment-notification.template");
+const interview_invitation_template_1 = require("../templates/interview-invitation.template");
+const income_invoice_template_1 = require("../templates/income-invoice.template");
 let EmailService = EmailService_1 = class EmailService {
     constructor() {
         this.logger = new common_1.Logger(EmailService_1.name);
@@ -266,6 +271,41 @@ let EmailService = EmailService_1 = class EmailService {
     async sendMeetingInvitations(params) {
         const subject = `Meeting Invitation: ${params.topic}`;
         const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
+        const start = new Date(params.dateTimeIso);
+        const end = new Date(start.getTime() + params.durationMinutes * 60000);
+        const formatIcsDate = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        const icsStart = formatIcsDate(start);
+        const icsEnd = formatIcsDate(end);
+        const uid = `${Date.now()}-${Math.random().toString(36).slice(2)}@nexoviasoft.com`;
+        const allAttendeeLines = params.attendees
+            .map((a) => `ATTENDEE;CN=${a.name};RSVP=TRUE:mailto:${a.email}`)
+            .join('\r\n');
+        const icsContent = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//NexoviaSoft//EN',
+            'CALSCALE:GREGORIAN',
+            'METHOD:REQUEST',
+            'BEGIN:VEVENT',
+            `UID:${uid}`,
+            `DTSTAMP:${formatIcsDate(new Date())}`,
+            `DTSTART:${icsStart}`,
+            `DTEND:${icsEnd}`,
+            `SUMMARY:${params.topic}`,
+            `DESCRIPTION:${(params.description || '').replace(/\n/g, '\\n')}\\n\\nJoin meeting: ${params.meetingLink}`,
+            `LOCATION:${params.meetingLink}`,
+            `ORGANIZER;CN=${params.organizerName || 'NexoviaSoft'}:mailto:${fromEmail}`,
+            allAttendeeLines,
+            'STATUS:CONFIRMED',
+            'SEQUENCE:0',
+            'BEGIN:VALARM',
+            'TRIGGER:-PT15M',
+            'ACTION:DISPLAY',
+            'DESCRIPTION:Meeting starting in 15 minutes',
+            'END:VALARM',
+            'END:VEVENT',
+            'END:VCALENDAR',
+        ].join('\r\n');
         for (const attendee of params.attendees) {
             const html = (0, meeting_invitation_template_1.getMeetingInvitationTemplate)({
                 attendeeName: attendee.name,
@@ -283,12 +323,126 @@ let EmailService = EmailService_1 = class EmailService {
                     to: attendee.email,
                     subject,
                     html,
+                    alternatives: [
+                        {
+                            contentType: 'text/calendar; charset=utf-8; method=REQUEST',
+                            content: icsContent,
+                        },
+                    ],
+                    attachments: [
+                        {
+                            filename: 'invite.ics',
+                            content: icsContent,
+                            contentType: 'text/calendar; charset=utf-8; method=REQUEST',
+                        },
+                    ],
                 });
-                this.logger.log(`Meeting invitation email sent to ${attendee.email}`);
+                this.logger.log(`Meeting invitation (with ICS) sent to ${attendee.email}`);
             }
             catch (error) {
                 this.logger.error(`Failed to send meeting invitation email to ${attendee.email}:`, error);
             }
+        }
+    }
+    async sendExpenseApproval(to, employeeName, expenseType, amount, managerName, invoiceId, invoiceHtml) {
+        const subject = `Expense Request Approved - ${expenseType}`;
+        const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
+        const html = (0, expense_approval_template_1.getExpenseApprovalTemplate)(employeeName, expenseType, amount, managerName, fromEmail, invoiceId);
+        try {
+            await this.transporter.sendMail({
+                from: fromEmail,
+                to,
+                subject,
+                html,
+                attachments: invoiceHtml ? [
+                    {
+                        filename: 'invoice.html',
+                        content: invoiceHtml,
+                    }
+                ] : [],
+            });
+            this.logger.log(`Expense approval email sent to ${to} for ${employeeName}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send expense approval email to ${to}:`, error);
+            throw error;
+        }
+    }
+    async sendExpenseRejection(to, employeeName, expenseType, amount, rejectionReason, managerName) {
+        const subject = `Expense Request Rejected - ${expenseType}`;
+        const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
+        const html = (0, expense_rejection_template_1.getExpenseRejectionTemplate)(employeeName, expenseType, amount, rejectionReason, managerName, fromEmail);
+        try {
+            await this.transporter.sendMail({
+                from: fromEmail,
+                to,
+                subject,
+                html,
+            });
+            this.logger.log(`Expense rejection email sent to ${to} for ${employeeName}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send expense rejection email to ${to}:`, error);
+            throw error;
+        }
+    }
+    async sendTaskCommentNotification(to, authorName, taskTitle, commentContent, projectName, taskUrl) {
+        const subject = `New Comment on Task: ${taskTitle}`;
+        const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
+        const html = (0, task_comment_notification_template_1.getTaskCommentNotificationTemplate)(authorName, taskTitle, commentContent, projectName, taskUrl, fromEmail);
+        try {
+            await this.transporter.sendMail({
+                from: fromEmail,
+                to,
+                subject,
+                html,
+            });
+            this.logger.log(`Task comment notification email sent to ${to} for task: ${taskTitle}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send task comment notification email to ${to}:`, error);
+        }
+    }
+    async sendInterviewInvitation(params) {
+        const subject = `Interview Invitation: ${params.position} at NexoviaSoft`;
+        const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
+        const html = (0, interview_invitation_template_1.getInterviewInvitationTemplate)(params.candidateName, params.position, params.type, params.date, params.time, params.interviewer, params.meetLink, fromEmail);
+        try {
+            await this.transporter.sendMail({
+                from: fromEmail,
+                to: params.to,
+                subject,
+                html,
+            });
+            this.logger.log(`Interview invitation email sent to ${params.to}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send interview invitation email to ${params.to}:`, error);
+            throw error;
+        }
+    }
+    async sendIncomeInvoice(to, clientName, amount, orderId, date, balanceValue, totalPaidSoFar) {
+        const subject = `Payment Received - Order #${orderId}`;
+        const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
+        const html = (0, income_invoice_template_1.getIncomeInvoiceTemplate)(clientName, amount, orderId, date, fromEmail, balanceValue, totalPaidSoFar);
+        try {
+            await this.transporter.sendMail({
+                from: fromEmail,
+                to,
+                subject,
+                html,
+                attachments: [
+                    {
+                        filename: `invoice-${orderId}.html`,
+                        content: html,
+                    }
+                ]
+            });
+            this.logger.log(`Income invoice email sent to ${to} for order: ${orderId}`);
+        }
+        catch (error) {
+            this.logger.error(`Failed to send income invoice email to ${to}:`, error);
+            throw error;
         }
     }
 };

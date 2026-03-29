@@ -78,6 +78,10 @@ __decorate([
     __metadata("design:type", Date)
 ], Order.prototype, "date", void 0);
 __decorate([
+    (0, typeorm_1.Column)('decimal', { precision: 10, scale: 2, default: 0 }),
+    __metadata("design:type", Number)
+], Order.prototype, "paidAmount", void 0);
+__decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)
 ], Order.prototype, "createdAt", void 0);

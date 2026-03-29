@@ -41,6 +41,7 @@ const broadcast_module_1 = require("./broadcast/broadcast.module");
 const meeting_module_1 = require("./meeting/meeting.module");
 const dashboard_module_1 = require("./dashboard/dashboard.module");
 const expense_module_1 = require("./expense/expense.module");
+const income_module_1 = require("./income/income.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -97,6 +98,7 @@ exports.AppModule = AppModule = __decorate([
             meeting_module_1.MeetingModule,
             dashboard_module_1.DashboardModule,
             expense_module_1.ExpenseModule,
+            income_module_1.IncomeModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

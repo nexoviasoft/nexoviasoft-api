@@ -10,7 +10,10 @@ export declare class JobPosting {
     location: string;
     status: string;
     applicants: number;
+    vacancy: number;
     postedDate: Date;
+    startDate: Date;
+    expiryDate: Date;
     description: string;
     imageUrl?: string;
     candidates: Candidate[];

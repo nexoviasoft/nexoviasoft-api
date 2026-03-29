@@ -7,4 +7,5 @@ export declare class CreateInterviewDto {
     type: string;
     status?: string;
     candidateId?: number;
+    meetLink?: string;
 }

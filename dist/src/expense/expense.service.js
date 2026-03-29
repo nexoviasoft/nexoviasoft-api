@@ -54,6 +54,12 @@ let ExpenseService = ExpenseService_1 = class ExpenseService {
           <p><strong>Amount:</strong> ${savedExpense.amount}</p>
           <p><strong>Description:</strong> ${savedExpense.description || 'N/A'}</p>
           <p>Please log in to the admin panel to approve or reject this request.</p>
+          <div style="margin-top: 20px;">
+            <a href="${process.env.FRONTEND_URL || 'https://admin.nexoviasoft.com'}/admin/expense" 
+               style="background-color: #3b82f6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+              Review Expense Request
+            </a>
+          </div>
         `;
                 await this.emailService.sendGenericEmail(managerEmails, subject, body);
             }
@@ -95,7 +101,7 @@ let ExpenseService = ExpenseService_1 = class ExpenseService {
             return await this.approve(id, user.id);
         }
         if (updateExpenseDto.status === expense_entity_1.ExpenseStatus.REJECTED && expense.status !== expense_entity_1.ExpenseStatus.REJECTED) {
-            return await this.reject(id, user.id);
+            return await this.reject(id, user.id, updateExpenseDto.rejectionReason);
         }
         Object.assign(expense, updateExpenseDto);
         return await this.expenseRepository.save(expense);
@@ -105,13 +111,15 @@ let ExpenseService = ExpenseService_1 = class ExpenseService {
         if (expense.status === expense_entity_1.ExpenseStatus.APPROVED) {
             return expense;
         }
+        const approver = await this.teamRepository.findOne({ where: { id: approverId } });
+        const managerName = approver ? `${approver.firstName} ${approver.lastName}` : 'Manager';
         expense.status = expense_entity_1.ExpenseStatus.APPROVED;
         expense.approverId = approverId;
         const savedExpense = await this.expenseRepository.save(expense);
         try {
             const requester = await this.teamRepository.findOne({ where: { id: expense.requesterId } });
             if (requester) {
-                await this.documentsService.create({
+                const invoice = await this.documentsService.create({
                     type: 'invoice',
                     clientName: `${requester.firstName} ${requester.lastName}`,
                     clientEmail: requester.email,
@@ -119,6 +127,7 @@ let ExpenseService = ExpenseService_1 = class ExpenseService {
                         invoiceNumber: `EXP-${expense.id}`,
                         date: new Date().toLocaleDateString(),
                         clientName: `${requester.firstName} ${requester.lastName}`,
+                        managerName: managerName,
                         items: [
                             {
                                 description: `Expense: ${expense.type} - ${expense.description || ''}`,
@@ -129,13 +138,8 @@ let ExpenseService = ExpenseService_1 = class ExpenseService {
                     },
                     status: 'approved',
                 });
-                const subject = `Expense Request Approved - ${expense.type}`;
-                const body = `
-          <h2>Expense Approved</h2>
-          <p>Your expense request for <strong>${expense.type}</strong> of <strong>${expense.amount}</strong> has been approved.</p>
-          <p>An invoice has been generated for your records.</p>
-        `;
-                await this.emailService.sendGenericEmail(requester.email, subject, body);
+                const invoiceHtml = this.documentsService.generateInvoiceHtml(invoice.data);
+                await this.emailService.sendExpenseApproval(requester.email, `${requester.firstName} ${requester.lastName}`, expense.type, expense.amount, managerName, invoice.id, invoiceHtml);
             }
         }
         catch (error) {
@@ -143,20 +147,20 @@ let ExpenseService = ExpenseService_1 = class ExpenseService {
         }
         return savedExpense;
     }
-    async reject(id, approverId) {
+    async reject(id, approverId, rejectionReason) {
         const expense = await this.findOne(id);
+        const approver = await this.teamRepository.findOne({ where: { id: approverId } });
+        const managerName = approver ? `${approver.firstName} ${approver.lastName}` : 'Manager';
         expense.status = expense_entity_1.ExpenseStatus.REJECTED;
         expense.approverId = approverId;
+        if (rejectionReason) {
+            expense.rejectionReason = rejectionReason;
+        }
         const savedExpense = await this.expenseRepository.save(expense);
         try {
             const requester = await this.teamRepository.findOne({ where: { id: expense.requesterId } });
             if (requester) {
-                const subject = `Expense Request Rejected - ${expense.type}`;
-                const body = `
-          <h2>Expense Rejected</h2>
-          <p>Your expense request for <strong>${expense.type}</strong> of <strong>${expense.amount}</strong> has been rejected.</p>
-        `;
-                await this.emailService.sendGenericEmail(requester.email, subject, body);
+                await this.emailService.sendExpenseRejection(requester.email, `${requester.firstName} ${requester.lastName}`, expense.type, expense.amount, rejectionReason, managerName);
             }
         }
         catch (error) {

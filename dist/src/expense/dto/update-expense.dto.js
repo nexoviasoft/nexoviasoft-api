@@ -22,4 +22,8 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateExpenseDto.prototype, "status", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateExpenseDto.prototype, "rejectionReason", void 0);
 //# sourceMappingURL=update-expense.dto.js.map

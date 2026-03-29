@@ -66,7 +66,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Candidate.prototype, "jobPostingId", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => interview_entity_1.Interview, (interview) => interview.candidate),
+    (0, typeorm_1.OneToMany)(() => interview_entity_1.Interview, (interview) => interview.candidateEntity),
     __metadata("design:type", Array)
 ], Candidate.prototype, "interviews", void 0);
 __decorate([
@@ -81,6 +81,14 @@ __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], Candidate.prototype, "cvUrl", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Candidate.prototype, "cvData", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Candidate.prototype, "cvFilename", void 0);
 exports.Candidate = Candidate = __decorate([
     (0, typeorm_1.Entity)('candidates')
 ], Candidate);

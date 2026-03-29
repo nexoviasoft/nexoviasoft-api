@@ -4,6 +4,7 @@ import { UpdateMeetingDto } from './dto/update-meeting.dto';
 export declare class MeetingController {
     private readonly meetingService;
     constructor(meetingService: MeetingService);
+    private readonly logger;
     create(createMeetingDto: CreateMeetingDto): Promise<import("./entities/meeting.entity").Meeting>;
     findAll(): Promise<import("./entities/meeting.entity").Meeting[]>;
     findOne(id: string): Promise<import("./entities/meeting.entity").Meeting>;

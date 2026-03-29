@@ -18,12 +18,14 @@ const order_tracking_controller_1 = require("./order-tracking.controller");
 const order_entity_1 = require("./entities/order.entity");
 const order_message_entity_1 = require("./entities/order-message.entity");
 const order_tracking_entity_1 = require("./entities/order-tracking.entity");
+const our_client_entity_1 = require("../setting/our-client/entities/our-client.entity");
+const category_entity_1 = require("../setting/category/entities/category.entity");
 let OrderModule = class OrderModule {
 };
 exports.OrderModule = OrderModule;
 exports.OrderModule = OrderModule = __decorate([
     (0, common_1.Module)({
-        imports: [typeorm_1.TypeOrmModule.forFeature([order_entity_1.Order, order_message_entity_1.OrderMessage, order_tracking_entity_1.OrderTracking])],
+        imports: [typeorm_1.TypeOrmModule.forFeature([order_entity_1.Order, order_message_entity_1.OrderMessage, order_tracking_entity_1.OrderTracking, our_client_entity_1.OurClient, category_entity_1.Category])],
         controllers: [order_controller_1.OrderController, order_messages_controller_1.OrderMessagesController, order_tracking_controller_1.OrderTrackingController],
         providers: [order_service_1.OrderService, order_messages_service_1.OrderMessagesService, order_tracking_service_1.OrderTrackingService],
         exports: [order_service_1.OrderService, order_messages_service_1.OrderMessagesService, order_tracking_service_1.OrderTrackingService],

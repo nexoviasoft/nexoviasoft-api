@@ -70,13 +70,13 @@ export class GoogleCalendarService {
     const response = await calendar.events.insert({
       calendarId: 'primary',
       conferenceDataVersion: 1,
-      sendUpdates: 'all', // sends calendar invites to all attendees
+      // NOTE: Service Accounts cannot add attendees without Domain-Wide Delegation.
+      // We omit attendees here and send invitations via EmailService instead.
       requestBody: {
         summary: data.summary,
         description: data.description ?? '',
         start: { dateTime: data.start, timeZone: 'UTC' },
         end: { dateTime: data.end, timeZone: 'UTC' },
-        attendees: data.attendees ?? [],
         conferenceData: {
           createRequest: {
             requestId,

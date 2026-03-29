@@ -41,12 +41,12 @@ let ReportsService = class ReportsService {
         const rangeMs = rangeEnd.getTime() - rangeStart.getTime();
         const prevEnd = new Date(rangeStart.getTime() - 1);
         const prevStart = new Date(prevEnd.getTime() - rangeMs);
-        const [orders, prevOrders, tasks, projects, attendances] = await Promise.all([
-            this.orderRepository.find({
+        const [incomes, prevIncomes, tasks, projects, attendances] = await Promise.all([
+            this.orderRepository.manager.getRepository('Income').find({
                 where: { createdAt: (0, typeorm_2.Between)(rangeStart, rangeEnd) },
                 order: { createdAt: 'ASC' },
             }),
-            this.orderRepository.find({
+            this.orderRepository.manager.getRepository('Income').find({
                 where: { createdAt: (0, typeorm_2.Between)(prevStart, prevEnd) },
             }),
             this.taskRepository.find({
@@ -57,8 +57,8 @@ let ReportsService = class ReportsService {
                 where: { createdAt: (0, typeorm_2.Between)(rangeStart, rangeEnd) },
             }),
         ]);
-        const totalRevenue = orders.reduce((sum, o) => sum + this.toNumber(o.amount), 0);
-        const prevRevenue = prevOrders.reduce((sum, o) => sum + this.toNumber(o.amount), 0);
+        const totalRevenue = incomes.reduce((sum, i) => sum + this.toNumber(i.amount), 0);
+        const prevRevenue = prevIncomes.reduce((sum, i) => sum + this.toNumber(i.amount), 0);
         const revenueChangePct = prevRevenue > 0 ? ((totalRevenue - prevRevenue) / prevRevenue) * 100 : null;
         const totalMinutesWorked = attendances.reduce((sum, a) => {
             const minutes = this.parseWorkHoursToMinutes(a.workHours);
@@ -77,7 +77,7 @@ let ReportsService = class ReportsService {
         const totalTasks = tasks.length;
         const completedTasks = tasks.filter((t) => (t.status || '').toLowerCase() === 'complete').length;
         const efficiency = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-        const revenueTrend = this.groupOrdersByMonth(orders);
+        const revenueTrend = this.groupIncomesByMonth(incomes);
         const taskDistribution = this.buildTaskDistribution(tasks);
         const stats = [
             {
@@ -171,15 +171,15 @@ let ReportsService = class ReportsService {
             return 0;
         return h * 60 + mins;
     }
-    groupOrdersByMonth(orders) {
+    groupIncomesByMonth(incomes) {
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         const buckets = new Map();
-        for (const o of orders) {
-            const d = o.createdAt instanceof Date ? o.createdAt : new Date(o.createdAt);
+        for (const i of incomes) {
+            const d = i.createdAt instanceof Date ? i.createdAt : new Date(i.createdAt);
             if (Number.isNaN(d.getTime()))
                 continue;
             const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-            buckets.set(key, (buckets.get(key) || 0) + this.toNumber(o.amount));
+            buckets.set(key, (buckets.get(key) || 0) + this.toNumber(i.amount));
         }
         const sortedKeys = [...buckets.keys()].sort();
         return sortedKeys.map((key) => {

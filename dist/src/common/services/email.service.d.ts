@@ -30,4 +30,18 @@ export declare class EmailService {
         meetingLink: string;
         organizerName?: string | null;
     }): Promise<void>;
+    sendExpenseApproval(to: string, employeeName: string, expenseType: string, amount: number, managerName: string, invoiceId?: number, invoiceHtml?: string): Promise<void>;
+    sendExpenseRejection(to: string, employeeName: string, expenseType: string, amount: number, rejectionReason: string | null, managerName: string): Promise<void>;
+    sendTaskCommentNotification(to: string, authorName: string, taskTitle: string, commentContent: string, projectName: string, taskUrl: string): Promise<void>;
+    sendInterviewInvitation(params: {
+        to: string;
+        candidateName: string;
+        position: string;
+        type: string;
+        date: string;
+        time: string;
+        interviewer: string;
+        meetLink?: string;
+    }): Promise<void>;
+    sendIncomeInvoice(to: string, clientName: string, amount: number, orderId: string, date: string, balanceValue: number, totalPaidSoFar: number): Promise<void>;
 }

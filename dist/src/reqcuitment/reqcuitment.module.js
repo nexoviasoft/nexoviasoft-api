@@ -14,13 +14,14 @@ const reqcuitment_controller_1 = require("./reqcuitment.controller");
 const job_posting_entity_1 = require("./entities/job-posting.entity");
 const candidate_entity_1 = require("./entities/candidate.entity");
 const interview_entity_1 = require("./entities/interview.entity");
+const department_entity_1 = require("../setting/department/entities/department.entity");
 let ReqcuitmentModule = class ReqcuitmentModule {
 };
 exports.ReqcuitmentModule = ReqcuitmentModule;
 exports.ReqcuitmentModule = ReqcuitmentModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            typeorm_1.TypeOrmModule.forFeature([job_posting_entity_1.JobPosting, candidate_entity_1.Candidate, interview_entity_1.Interview]),
+            typeorm_1.TypeOrmModule.forFeature([job_posting_entity_1.JobPosting, candidate_entity_1.Candidate, interview_entity_1.Interview, department_entity_1.Department]),
         ],
         controllers: [reqcuitment_controller_1.ReqcuitmentController],
         providers: [reqcuitment_service_1.ReqcuitmentService],

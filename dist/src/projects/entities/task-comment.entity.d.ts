@@ -6,5 +6,6 @@ export declare class TaskComment {
     author: string;
     content: string;
     mentions: string[];
+    parentId: number;
     createdAt: Date;
 }

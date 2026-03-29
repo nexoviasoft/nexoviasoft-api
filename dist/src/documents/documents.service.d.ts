@@ -20,6 +20,6 @@ export declare class DocumentsService {
     private getDefaultSubject;
     private getDefaultMessage;
     private generatePdfHtml;
-    private generateInvoiceHtml;
+    generateInvoiceHtml(data: any): string;
     private generateLetterHtml;
 }
