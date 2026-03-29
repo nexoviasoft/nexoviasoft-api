@@ -386,6 +386,46 @@ export class EmailService {
     const subject = `Meeting Invitation: ${params.topic}`;
     const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
 
+    const start = new Date(params.dateTimeIso);
+    const end = new Date(start.getTime() + params.durationMinutes * 60000);
+
+    const formatIcsDate = (d: Date) =>
+      d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+
+    const icsStart = formatIcsDate(start);
+    const icsEnd = formatIcsDate(end);
+    const uid = `${Date.now()}-${Math.random().toString(36).slice(2)}@nexoviasoft.com`;
+    const allAttendeeLines = params.attendees
+      .map((a) => `ATTENDEE;CN=${a.name};RSVP=TRUE:mailto:${a.email}`)
+      .join('\r\n');
+
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//NexoviaSoft//EN',
+      'CALSCALE:GREGORIAN',
+      'METHOD:REQUEST',
+      'BEGIN:VEVENT',
+      `UID:${uid}`,
+      `DTSTAMP:${formatIcsDate(new Date())}`,
+      `DTSTART:${icsStart}`,
+      `DTEND:${icsEnd}`,
+      `SUMMARY:${params.topic}`,
+      `DESCRIPTION:${(params.description || '').replace(/\n/g, '\\n')}\\n\\nJoin meeting: ${params.meetingLink}`,
+      `LOCATION:${params.meetingLink}`,
+      `ORGANIZER;CN=${params.organizerName || 'NexoviaSoft'}:mailto:${fromEmail}`,
+      allAttendeeLines,
+      'STATUS:CONFIRMED',
+      'SEQUENCE:0',
+      'BEGIN:VALARM',
+      'TRIGGER:-PT15M',
+      'ACTION:DISPLAY',
+      'DESCRIPTION:Meeting starting in 15 minutes',
+      'END:VALARM',
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\r\n');
+
     // Send individually so each recipient sees their own name.
     for (const attendee of params.attendees) {
       const html = getMeetingInvitationTemplate({
@@ -405,8 +445,22 @@ export class EmailService {
           to: attendee.email,
           subject,
           html,
+          // ICS attachment — Gmail will show "Add to Calendar" inline
+          alternatives: [
+            {
+              contentType: 'text/calendar; charset=utf-8; method=REQUEST',
+              content: icsContent,
+            },
+          ],
+          attachments: [
+            {
+              filename: 'invite.ics',
+              content: icsContent,
+              contentType: 'text/calendar; charset=utf-8; method=REQUEST',
+            },
+          ],
         });
-        this.logger.log(`Meeting invitation email sent to ${attendee.email}`);
+        this.logger.log(`Meeting invitation (with ICS) sent to ${attendee.email}`);
       } catch (error) {
         this.logger.error(`Failed to send meeting invitation email to ${attendee.email}:`, error);
         // Don't throw: meeting can still be created even if one email fails.
