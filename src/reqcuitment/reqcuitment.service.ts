@@ -280,7 +280,6 @@ export class ReqcuitmentService {
   }
 
   private async sendInterviewInvitationEmail(candidate: Candidate, interview: Interview) {
-    const subject = `Interview Invitation: ${interview.position} at NexoviaSoft`;
     const dateFormatted = new Date(interview.date).toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -288,48 +287,20 @@ export class ReqcuitmentService {
       day: 'numeric',
     });
 
-    const body = `
-      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; background-color: #ffffff;">
-        <div style="text-align: center; margin-bottom: 20px;">
-          <h2 style="color: #F58220; margin-bottom: 5px;">NexoviaSoft</h2>
-          <p style="color: #666; font-size: 14px; margin-top: 0;">Recruitment Team</p>
-        </div>
-        <div style="padding: 20px; color: #333; line-height: 1.6;">
-          <p>Dear <strong>${candidate.name}</strong>,</p>
-          <p>We are excited to invite you for an interview for the <strong>${interview.position}</strong> position at NexoviaSoft. We were impressed with your background and skills, and we'd like to learn more about you.</p>
-          
-          <div style="background-color: #f9f9f9; padding: 20px; border-left: 4px solid #F58220; margin: 20px 0; border-radius: 5px;">
-            <h3 style="margin-top: 0; color: #333; font-size: 18px;">Interview Details</h3>
-            <p style="margin: 5px 0;"><strong>Type:</strong> ${interview.type}</p>
-            <p style="margin: 5px 0;"><strong>Date:</strong> ${dateFormatted}</p>
-            <p style="margin: 5px 0;"><strong>Time:</strong> ${interview.time}</p>
-            <p style="margin: 5px 0;"><strong>Interviewer:</strong> ${interview.interviewer}</p>
-          </div>
-
-          ${interview.meetLink ? `
-            <div style="text-align: center; margin: 30px 0;">
-              <p style="margin-bottom: 15px;">You can join the interview via the following link:</p>
-              <a href="${interview.meetLink}" style="background-color: #F58220; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Join Online Interview</a>
-              <p style="font-size: 12px; color: #999; margin-top: 10px;">Link: ${interview.meetLink}</p>
-            </div>
-          ` : ''}
-
-          <p>Please confirm your availability by replying to this email. We look forward to meeting with you!</p>
-          
-          <p style="margin-top: 30px;">Best regards,<br>
-          <strong>NexoviaSoft Recruitment Team</strong></p>
-        </div>
-        <div style="text-align: center; padding-top: 20px; border-top: 1px solid #eeeeee; color: #999; font-size: 12px;">
-          <p>&copy; ${new Date().getFullYear()} NexoviaSoft. All rights reserved.</p>
-        </div>
-      </div>
-    `;
-
     try {
-      await this.emailService.sendGenericEmail(candidate.email, subject, body);
-      this.logger.log(`Interview invitation email sent to ${candidate.email}`);
+      await this.emailService.sendInterviewInvitation({
+        to: candidate.email,
+        candidateName: candidate.name,
+        position: interview.position,
+        type: interview.type,
+        date: dateFormatted,
+        time: interview.time,
+        interviewer: interview.interviewer,
+        meetLink: interview.meetLink,
+      });
+      this.logger.log(`Interview invitation email sent to candidate ${candidate.name} (${candidate.email}) for interview ID ${interview.id}`);
     } catch (error) {
-      this.logger.error(`Failed to send interview invitation email to ${candidate.email}: ${error.message}`);
+      this.logger.error(`Failed to send interview invitation email to ${candidate.email} (Candidate ID: ${candidate.id}): ${error.message}`);
     }
   }
 }

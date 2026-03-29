@@ -13,6 +13,7 @@ import { getProjectAssignmentTemplate } from '../templates/project-assignment.te
 import { getExpenseApprovalTemplate } from '../templates/expense-approval.template';
 import { getExpenseRejectionTemplate } from '../templates/expense-rejection.template';
 import { getTaskCommentNotificationTemplate } from '../templates/task-comment-notification.template';
+import { getInterviewInvitationTemplate } from '../templates/interview-invitation.template';
 
 @Injectable()
 export class EmailService {
@@ -27,9 +28,7 @@ export class EmailService {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: this.smtpConfig.host,
-
-    
+      service: 'gmail', // Use service: 'gmail' for simpler setup
       auth: {
         user: this.smtpConfig.user,
         pass: this.smtpConfig.password,
@@ -514,6 +513,43 @@ export class EmailService {
     } catch (error) {
       this.logger.error(`Failed to send task comment notification email to ${to}:`, error);
       // Don't throw - continue with other recipients
+    }
+  }
+
+  async sendInterviewInvitation(params: {
+    to: string;
+    candidateName: string;
+    position: string;
+    type: string;
+    date: string;
+    time: string;
+    interviewer: string;
+    meetLink?: string;
+  }): Promise<void> {
+    const subject = `Interview Invitation: ${params.position} at NexoviaSoft`;
+    const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
+    const html = getInterviewInvitationTemplate(
+      params.candidateName,
+      params.position,
+      params.type,
+      params.date,
+      params.time,
+      params.interviewer,
+      params.meetLink,
+      fromEmail,
+    );
+
+    try {
+      await this.transporter.sendMail({
+        from: fromEmail,
+        to: params.to,
+        subject,
+        html,
+      });
+      this.logger.log(`Interview invitation email sent to ${params.to}`);
+    } catch (error) {
+      this.logger.error(`Failed to send interview invitation email to ${params.to}:`, error);
+      throw error;
     }
   }
 }
