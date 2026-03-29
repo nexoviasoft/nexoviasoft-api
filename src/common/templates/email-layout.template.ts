@@ -45,12 +45,15 @@ export function renderEmailLayout(params: EmailLayoutParams): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${title}</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
     body {
       margin: 0;
       padding: 0;
-      background: #eef2f8;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-      color: #0f172a;
+      background-color: #f8fafc;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      color: #1e293b;
+      -webkit-font-smoothing: antialiased;
     }
     .preheader {
       display: none;
@@ -62,140 +65,179 @@ export function renderEmailLayout(params: EmailLayoutParams): string {
     }
     .wrap {
       width: 100%;
-      padding: 24px 12px;
+      padding: 40px 15px;
+      box-sizing: border-box;
     }
     .card {
-      max-width: 680px;
+      max-width: 600px;
       margin: 0 auto;
       background: #ffffff;
-      border: 1px solid #dbe3ef;
-      border-radius: 18px;
+      border-radius: 24px;
       overflow: hidden;
-      box-shadow: 0 14px 38px rgba(15, 23, 42, 0.09);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      border: 1px solid #e2e8f0;
     }
     .hero {
-      background: linear-gradient(135deg, ${accent}, #0f172a);
-      padding: 30px 28px;
+      background: linear-gradient(135deg, ${accent} 0%, #1e293b 100%);
+      padding: 48px 40px;
       color: #ffffff;
+      text-align: center;
     }
     .eyebrow {
       display: inline-block;
-      background: rgba(255, 255, 255, 0.17);
-      border: 1px solid rgba(255, 255, 255, 0.34);
-      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(4px);
+      padding: 6px 14px;
       border-radius: 999px;
       font-size: 12px;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
       font-weight: 700;
-      margin-bottom: 12px;
+      margin-bottom: 20px;
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
     }
     .hero h1 {
       margin: 0;
-      font-size: 30px;
+      font-size: 32px;
       line-height: 1.2;
-      letter-spacing: -0.02em;
+      font-weight: 800;
+      letter-spacing: -0.025em;
     }
     .hero p {
-      margin: 10px 0 0;
-      color: rgba(255, 255, 255, 0.92);
-      font-size: 15px;
+      margin: 16px 0 0;
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 16px;
       line-height: 1.6;
+      font-weight: 500;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .body {
-      padding: 26px;
+      padding: 40px;
       background: #ffffff;
     }
     .p {
-      margin: 0 0 12px;
-      font-size: 15px;
-      line-height: 1.65;
-      color: #1e293b;
+      margin: 0 0 1.25rem;
+      font-size: 16px;
+      line-height: 1.625;
+      color: #334155;
     }
     .box {
-      border: 1px solid #dbe3ef;
-      background: #f8fbff;
-      border-radius: 12px;
-      padding: 16px;
-      margin: 16px 0;
+      border: 1px solid #e2e8f0;
+      background: #fbfcfe;
+      border-radius: 16px;
+      padding: 24px;
+      margin: 24px 0;
     }
     .box-title {
-      margin: 0 0 10px;
-      font-size: 14px;
-      letter-spacing: 0.02em;
+      margin: 0 0 16px;
+      font-size: 13px;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
-      color: #334155;
+      color: #64748b;
       font-weight: 700;
     }
     .kvs {
       width: 100%;
       border-collapse: collapse;
-      margin: 4px 0 0;
     }
     .kvs td {
-      padding: 9px 0;
+      padding: 12px 0;
       vertical-align: top;
-      border-bottom: 1px solid #e8eef7;
-      font-size: 14px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 15px;
     }
     .kvs tr:last-child td {
       border-bottom: 0;
     }
     .key {
-      width: 150px;
-      color: #475569;
-      font-weight: 600;
+      width: 140px;
+      color: #64748b;
+      font-weight: 500;
     }
     .value {
       color: #0f172a;
-      font-weight: 500;
+      font-weight: 600;
+      text-align: right;
     }
     .badge {
-      display: inline-block;
-      padding: 4px 10px;
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 12px;
       border-radius: 999px;
       font-size: 12px;
       font-weight: 700;
-      letter-spacing: 0.02em;
-      border: 1px solid #c9d7ea;
-      background: #edf4ff;
-      color: #0f3f7f;
+      letter-spacing: 0.025em;
       text-transform: uppercase;
+    }
+    .badge-success {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+    .badge-error {
+      background-color: #fee2e2;
+      color: #991b1b;
     }
     .cta {
       display: inline-block;
-      margin: 12px 0 4px;
+      margin-top: 24px;
       text-decoration: none;
       background: ${accent};
       color: #ffffff !important;
-      border-radius: 10px;
-      padding: 11px 16px;
-      font-size: 14px;
-      font-weight: 700;
-      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 12px;
+      padding: 14px 28px;
+      font-size: 16px;
+      font-weight: 600;
+      text-align: center;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
     .note {
-      margin-top: 16px;
-      background: #fff8e8;
-      border: 1px solid #f7d9a2;
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 13px;
-      color: #8a5b10;
+      margin-top: 24px;
+      background: #fffbeb;
+      border: 1px solid #fef3c7;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 14px;
+      color: #92400e;
       line-height: 1.6;
     }
     .footer {
       background: #f8fafc;
-      border-top: 1px solid #dbe3ef;
-      padding: 18px 26px;
+      border-top: 1px solid #e2e8f0;
+      padding: 32px 40px;
       color: #64748b;
-      font-size: 12px;
+      font-size: 13px;
       line-height: 1.7;
+      text-align: center;
     }
     .footer a {
-      color: #1f7ae0;
+      color: ${accent};
       text-decoration: none;
       font-weight: 600;
+    }
+    .signature-area {
+      margin-top: 32px;
+      text-align: center;
+    }
+    .signature-name {
+      font-family: 'Brush Script MT', cursive;
+      font-size: 24px;
+      color: #1e293b;
+      margin-bottom: 4px;
+    }
+    .signature-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 800;
+      color: #94a3b8;
+      border-top: 1px solid #e2e8f0;
+      display: inline-block;
+      padding-top: 8px;
+      min-width: 180px;
     }
   </style>
 </head>
@@ -212,9 +254,9 @@ export function renderEmailLayout(params: EmailLayoutParams): string {
         ${contentHtml}
       </div>
       <div class="footer">
-        <div>${footerNote || 'This is an automated email from NexoviaSoft. Please do not reply to this message.'}</div>
-        ${contactEmail ? `<div>Support: <a href="mailto:${contactEmail}">${contactEmail}</a></div>` : ''}
-        <div>&copy; ${new Date().getFullYear()} NexoviaSoft. All rights reserved.</div>
+        <div style="margin-bottom: 12px;">${footerNote || 'This is an automated email from NexoviaSoft. Please do not reply to this message.'}</div>
+        ${contactEmail ? `<div style="margin-bottom: 12px;">Need help? <a href="mailto:${contactEmail}">Contact Support</a></div>` : ''}
+        <div style="font-size: 12px; color: #94a3b8;">&copy; ${new Date().getFullYear()} NexoviaSoft. All rights reserved.</div>
       </div>
     </div>
   </div>

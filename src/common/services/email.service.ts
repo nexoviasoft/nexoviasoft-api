@@ -417,6 +417,8 @@ export class EmailService {
     expenseType: string,
     amount: number,
     managerName: string,
+    invoiceId?: number,
+    invoiceHtml?: string,
   ): Promise<void> {
     const subject = `Expense Request Approved - ${expenseType}`;
     const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
@@ -426,6 +428,7 @@ export class EmailService {
       amount,
       managerName,
       fromEmail,
+      invoiceId,
     );
 
     try {
@@ -434,6 +437,12 @@ export class EmailService {
         to,
         subject,
         html,
+        attachments: invoiceHtml ? [
+          {
+            filename: 'invoice.html',
+            content: invoiceHtml,
+          }
+        ] : [],
       });
       this.logger.log(`Expense approval email sent to ${to} for ${employeeName}`);
     } catch (error) {

@@ -161,7 +161,7 @@ export class DocumentsService {
     return '<html><body><p>Document content</p></body></html>';
   }
 
-  private generateInvoiceHtml(data: any): string {
+  public generateInvoiceHtml(data: any): string {
     const items = data.items || [];
     const total = items.reduce((sum: number, item: any) => {
       return sum + (Number(item.quantity) * Number(item.rate));

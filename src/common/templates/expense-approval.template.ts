@@ -6,20 +6,24 @@ export function getExpenseApprovalTemplate(
   amount: number,
   managerName: string,
   contactEmail: string,
+  invoiceId?: number,
 ): string {
   const contentHtml = `
-    <p class="p">Dear <strong>${employeeName}</strong>,</p>
-    <p class="p">We are pleased to inform you that your expense request for <strong>${expenseType}</strong> has been <strong>approved</strong>.</p>
+    <p class="p">Hello <strong>${employeeName}</strong>,</p>
+    <p class="p">Great news! Your expense reimbursement request for <strong>${expenseType}</strong> has been <strong>approved</strong> and is now being processed.</p>
     
     <div class="box">
-      <h3 class="box-title">Expense Details</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 class="box-title" style="margin: 0;">Expense Details</h3>
+        <span class="badge badge-success">Approved</span>
+      </div>
       <table class="kvs">
         <tr>
           <td class="key">Amount</td>
-          <td class="value">$${amount.toLocaleString()}</td>
+          <td class="value" style="font-size: 18px; color: #10b981;">$${amount.toLocaleString()}</td>
         </tr>
         <tr>
-          <td class="key">Type</td>
+          <td class="key">Expense Type</td>
           <td class="value">${expenseType}</td>
         </tr>
         <tr>
@@ -29,18 +33,36 @@ export function getExpenseApprovalTemplate(
       </table>
     </div>
 
-    <p class="p">An official invoice has been generated for this expense. You can find the document attached or previewed below.</p>
+    ${invoiceId ? `
+    <div class="box" style="background: #f8fafc; border-style: dashed; border-color: #cbd5e1;">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+        <div style="background: #10b981; color: white; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+          DOC
+        </div>
+        <div>
+          <div style="font-size: 14px; font-weight: 600; color: #0f172a;">Official Invoice Generated</div>
+          <div style="font-size: 12px; color: #64748b;">Ref: EXP-${invoiceId}</div>
+        </div>
+      </div>
+      <p style="font-size: 13px; color: #475569; margin: 0 0 16px;">An official record of this expense has been generated for your records.</p>
+      <a href="${process.env.FRONTEND_URL || 'https://admin.nexoviasoft.com'}/invoice/${invoiceId}" 
+         style="display: inline-block; color: #10b981; font-weight: 700; text-decoration: none; font-size: 14px; border: 1px solid #10b981; padding: 8px 16px; border-radius: 8px;">
+        Download Invoice (PDF)
+      </a>
+    </div>
+    ` : ''}
+
+    <p class="p">You can track the status of all your reimbursements directly from your dashboard.</p>
     
-    <div style="text-align: center; margin: 30px 0;">
-      <a href="${process.env.FRONTEND_URL || 'https://admin.nexoviasoft.com'}/expense" 
-         style="background-color: #10b981; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
-        View Expenses
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${process.env.FRONTEND_URL || 'https://admin.nexoviasoft.com'}/expense" class="cta">
+        Go to Dashboard
       </a>
     </div>
 
-    <div style="margin-top: 20px; text-align: center;">
-      <div style="font-family: 'Brush Script MT', cursive; font-size: 20px; color: #1e293b;">${managerName}</div>
-      <div style="font-size: 12px; font-weight: bold; color: #64748b; border-top: 1px solid #e2e8f0; display: inline-block; padding-top: 4px; min-width: 150px;">Authorized Signature</div>
+    <div class="signature-area">
+      <div class="signature-name">${managerName}</div>
+      <div class="signature-label">Authorized Approval</div>
     </div>
   `;
 

@@ -128,7 +128,7 @@ export class ExpenseService {
     try {
       const requester = await this.teamRepository.findOne({ where: { id: expense.requesterId } });
       if (requester) {
-        await this.documentsService.create({
+        const invoice = await this.documentsService.create({
           type: 'invoice',
           clientName: `${requester.firstName} ${requester.lastName}`,
           clientEmail: requester.email,
@@ -148,6 +148,9 @@ export class ExpenseService {
           status: 'approved',
         });
 
+        // Generate Invoice HTML for attachment
+        const invoiceHtml = this.documentsService.generateInvoiceHtml(invoice.data);
+
         // Notify Requester
         await this.emailService.sendExpenseApproval(
           requester.email,
@@ -155,6 +158,8 @@ export class ExpenseService {
           expense.type,
           expense.amount,
           managerName,
+          invoice.id,
+          invoiceHtml,
         );
       }
     } catch (error) {

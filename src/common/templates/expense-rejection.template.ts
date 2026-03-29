@@ -9,18 +9,21 @@ export function getExpenseRejectionTemplate(
   contactEmail: string,
 ): string {
   const contentHtml = `
-    <p class="p">Dear <strong>${employeeName}</strong>,</p>
-    <p class="p">We are writing to inform you that your expense request for <strong>${expenseType}</strong> has been <strong>rejected</strong>.</p>
+    <p class="p">Hello <strong>${employeeName}</strong>,</p>
+    <p class="p">We are writing to inform you that your expense request for <strong>${expenseType}</strong> has been <strong>rejected</strong> by management.</p>
     
-    <div class="box" style="background-color: #fef2f2; border-color: #fecaca;">
-      <h3 class="box-title" style="color: #991b1b;">Rejection Details</h3>
+    <div class="box" style="background-color: #fff1f2; border-color: #fecdd3;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 class="box-title" style="margin: 0; color: #9f1239;">Rejection Details</h3>
+        <span class="badge badge-error">Rejected</span>
+      </div>
       <table class="kvs">
         <tr>
           <td class="key">Amount</td>
-          <td class="value">$${amount.toLocaleString()}</td>
+          <td class="value" style="color: #be123c;">$${amount.toLocaleString()}</td>
         </tr>
         <tr>
-          <td class="key">Type</td>
+          <td class="key">Expense Type</td>
           <td class="value">${expenseType}</td>
         </tr>
         <tr>
@@ -31,24 +34,23 @@ export function getExpenseRejectionTemplate(
     </div>
 
     ${rejectionReason ? `
-      <div class="note">
-        <strong>Reason for Rejection:</strong><br/>
+      <div class="note" style="background-color: #fff1f2; border-color: #fecdd3; color: #9f1239;">
+        <strong style="display: block; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em;">Reason for Rejection</strong>
         ${rejectionReason}
       </div>
     ` : ''}
 
-    <p class="p">If you have any questions or would like to provide additional information, please discuss this with your manager.</p>
+    <p class="p">If you have any questions or would like to provide additional information for a follow-up, please reach out to your reporting manager.</p>
 
-    <div style="text-align: center; margin: 30px 0;">
-      <a href="${process.env.FRONTEND_URL || 'https://admin.nexoviasoft.com'}/expense" 
-         style="background-color: #ef4444; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">
-        View Expenses
+    <div style="text-align: center; margin: 32px 0;">
+      <a href="${process.env.FRONTEND_URL || 'https://admin.nexoviasoft.com'}/expense" class="cta">
+        Review My Expenses
       </a>
     </div>
 
-    <div style="margin-top: 20px; text-align: center;">
-      <div style="font-family: 'Brush Script MT', cursive; font-size: 20px; color: #1e293b;">${managerName}</div>
-      <div style="font-size: 12px; font-weight: bold; color: #64748b; border-top: 1px solid #e2e8f0; display: inline-block; padding-top: 4px; min-width: 150px;">Authorized Signature</div>
+    <div class="signature-area">
+      <div class="signature-name">${managerName}</div>
+      <div class="signature-label">Authorized Signature</div>
     </div>
   `;
 
