@@ -61,6 +61,9 @@ export class Order {
   @Column({ type: 'date', nullable: true })
   date: Date;
 
+  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  paidAmount: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

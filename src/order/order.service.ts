@@ -176,14 +176,14 @@ export class OrderService {
   }
 
   async getStats() {
-    const [total, inProgress, completed, allOrders] = await Promise.all([
+    const [total, inProgress, completed, incomeRecords] = await Promise.all([
       this.orderRepository.count(),
       this.orderRepository.count({ where: { status: OrderStatus.IN_PROGRESS } }),
       this.orderRepository.count({ where: { status: OrderStatus.COMPLETED } }),
-      this.orderRepository.find({ select: ['amount'] }),
+      this.orderRepository.manager.getRepository('Income').find({ select: ['amount'] }),
     ]);
 
-    const totalRevenue = allOrders.reduce((sum, order) => sum + Number(order.amount || 0), 0);
+    const totalRevenue = incomeRecords.reduce((sum, income) => sum + Number((income as any).amount || 0), 0);
 
     return {
       total,

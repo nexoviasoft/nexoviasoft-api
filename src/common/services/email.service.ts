@@ -14,6 +14,8 @@ import { getExpenseApprovalTemplate } from '../templates/expense-approval.templa
 import { getExpenseRejectionTemplate } from '../templates/expense-rejection.template';
 import { getTaskCommentNotificationTemplate } from '../templates/task-comment-notification.template';
 import { getInterviewInvitationTemplate } from '../templates/interview-invitation.template';
+import { getIncomeInvoiceTemplate } from '../templates/income-invoice.template';
+
 
 @Injectable()
 export class EmailService {
@@ -28,7 +30,9 @@ export class EmailService {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      service: 'gmail', // Use service: 'gmail' for simpler setup
+      host: this.smtpConfig.host,
+
+    
       auth: {
         user: this.smtpConfig.user,
         pass: this.smtpConfig.password,
@@ -549,6 +553,47 @@ export class EmailService {
       this.logger.log(`Interview invitation email sent to ${params.to}`);
     } catch (error) {
       this.logger.error(`Failed to send interview invitation email to ${params.to}:`, error);
+      throw error;
+    }
+  }
+
+  async sendIncomeInvoice(
+    to: string,
+    clientName: string,
+    amount: number,
+    orderId: string,
+    date: string,
+    balanceValue: number,
+    totalPaidSoFar: number,
+  ): Promise<void> {
+    const subject = `Payment Received - Order #${orderId}`;
+    const fromEmail = this.smtpConfig.from || this.smtpConfig.user;
+    const html = getIncomeInvoiceTemplate(
+      clientName,
+      amount,
+      orderId,
+      date,
+      fromEmail,
+      balanceValue,
+      totalPaidSoFar,
+    );
+
+    try {
+      await this.transporter.sendMail({
+        from: fromEmail,
+        to,
+        subject,
+        html,
+        attachments: [
+          {
+            filename: `invoice-${orderId}.html`,
+            content: html,
+          }
+        ]
+      });
+      this.logger.log(`Income invoice email sent to ${to} for order: ${orderId}`);
+    } catch (error) {
+      this.logger.error(`Failed to send income invoice email to ${to}:`, error);
       throw error;
     }
   }

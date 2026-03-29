@@ -41,12 +41,12 @@ export class ReportsService {
     const prevEnd = new Date(rangeStart.getTime() - 1);
     const prevStart = new Date(prevEnd.getTime() - rangeMs);
 
-    const [orders, prevOrders, tasks, projects, attendances] = await Promise.all([
-      this.orderRepository.find({
+    const [incomes, prevIncomes, tasks, projects, attendances] = await Promise.all([
+      this.orderRepository.manager.getRepository('Income').find({
         where: { createdAt: Between(rangeStart, rangeEnd) },
         order: { createdAt: 'ASC' },
       }),
-      this.orderRepository.find({
+      this.orderRepository.manager.getRepository('Income').find({
         where: { createdAt: Between(prevStart, prevEnd) },
       }),
       this.taskRepository.find({
@@ -58,9 +58,9 @@ export class ReportsService {
       }),
     ]);
 
-    // Total Revenue (from orders)
-    const totalRevenue = orders.reduce((sum, o) => sum + this.toNumber(o.amount), 0);
-    const prevRevenue = prevOrders.reduce((sum, o) => sum + this.toNumber(o.amount), 0);
+    // Total Revenue (from actual incomes)
+    const totalRevenue = incomes.reduce((sum, i) => sum + this.toNumber((i as any).amount), 0);
+    const prevRevenue = prevIncomes.reduce((sum, i) => sum + this.toNumber((i as any).amount), 0);
     const revenueChangePct =
       prevRevenue > 0 ? ((totalRevenue - prevRevenue) / prevRevenue) * 100 : null;
 
@@ -90,7 +90,7 @@ export class ReportsService {
     const efficiency = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
     // Revenue Trend (monthly buckets) for chart [{ name, pv }]
-    const revenueTrend = this.groupOrdersByMonth(orders);
+    const revenueTrend = this.groupIncomesByMonth(incomes as any);
 
     // Task Distribution for pie [{ name, value }]
     const taskDistribution = this.buildTaskDistribution(tasks);
@@ -200,15 +200,15 @@ export class ReportsService {
     return h * 60 + mins;
   }
 
-  private groupOrdersByMonth(orders: Order[]): Array<{ name: string; pv: number }> {
+  private groupIncomesByMonth(incomes: any[]): Array<{ name: string; pv: number }> {
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const buckets = new Map<string, number>(); // key: YYYY-MM
 
-    for (const o of orders) {
-      const d = o.createdAt instanceof Date ? o.createdAt : new Date(o.createdAt as any);
+    for (const i of incomes) {
+      const d = i.createdAt instanceof Date ? i.createdAt : new Date(i.createdAt as any);
       if (Number.isNaN(d.getTime())) continue;
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      buckets.set(key, (buckets.get(key) || 0) + this.toNumber(o.amount));
+      buckets.set(key, (buckets.get(key) || 0) + this.toNumber(i.amount));
     }
 
     const sortedKeys = [...buckets.keys()].sort();
