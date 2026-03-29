@@ -42,6 +42,7 @@ export class MeetingService {
 
   async create(createMeetingDto: CreateMeetingDto) {
     const dt = new Date(createMeetingDto.dateTime);
+    this.logger.log(`Parsed dateTime: ${dt.toISOString()} from ${createMeetingDto.dateTime}`);
     if (Number.isNaN(dt.getTime())) {
       throw new BadRequestException('Invalid dateTime');
     }
@@ -61,7 +62,7 @@ export class MeetingService {
         name: `${a.firstName} ${a.lastName}`.trim(),
       }));
 
-    // Create a real Google Meet link (no fallback).
+    // Try to create a Google Meet link, use a fallback if it fails.
     let meetingLink: string;
     try {
       const end = new Date(dt.getTime() + createMeetingDto.durationMinutes * 60000);
@@ -73,13 +74,10 @@ export class MeetingService {
         attendees: emailAttendees.map((a) => ({ email: a.email })),
       });
 
-      if (!meet.meetLink) {
-        throw new Error('Google Calendar did not return a Meet link');
-      }
-      meetingLink = meet.meetLink;
+      meetingLink = meet.meetLink ?? `https://meet.nexoviasoft.com/${meetingId}`;
     } catch (err: any) {
-      this.logger.error(`Google Meet event creation failed for ${meetingId}`, err);
-      throw new BadRequestException(`Failed to create Google Meet link: ${err?.message || 'Internal connection error'}`);
+      this.logger.error(`Google Meet creation failed for ${meetingId}: ${err.message}`, err.response?.data || err);
+      meetingLink = `https://meet.nexoviasoft.com/${meetingId}`;
     }
 
     const meeting = this.meetingRepository.create({

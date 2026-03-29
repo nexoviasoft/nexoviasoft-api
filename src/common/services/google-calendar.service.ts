@@ -43,6 +43,7 @@ export class GoogleCalendarService {
     end: string;
     attendees?: { email: string }[];
   }): Promise<{ eventId?: string; meetLink?: string }> {
+    this.logger.log('createMeetEvent called with:', JSON.stringify(data));
     return this.scheduleRequest(async () => {
       const requestId = randomUUID();
 
