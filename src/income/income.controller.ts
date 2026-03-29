@@ -7,11 +7,17 @@ import {
   Param,
   Delete,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { IncomeService } from './income.service';
 import { CreateIncomeDto, UpdateIncomeDto } from './dto/create-income.dto';
 
 @Controller('income')
+@UseGuards(AuthGuard('jwt'), RolesGuard)
+@Roles('admin', 'manager')
 export class IncomeController {
   constructor(private readonly incomeService: IncomeService) {}
 
