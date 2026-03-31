@@ -64,20 +64,29 @@ export class MeetingService {
 
     // Create Google Calendar event with Google Meet conference
     const end = new Date(dt.getTime() + createMeetingDto.durationMinutes * 60000);
-    const meet = await this.googleCalendarService.createMeetEvent({
-      summary: createMeetingDto.topic,
-      description: createMeetingDto.description,
-      start: dt.toISOString(),
-      end: end.toISOString(),
-      attendees: emailAttendees.map((a) => ({ email: a.email })),
-    });
 
-    if (!meet.meetLink) {
-      this.logger.error(`Google Meet link not returned for ${meetingId}`);
-      throw new BadRequestException('Google Meet link generation failed. Please try again.');
+    let meetingLink = 'https://meet.google.com/';
+    try {
+      const meet = await this.googleCalendarService.createMeetEvent({
+        summary: createMeetingDto.topic,
+        description: createMeetingDto.description,
+        start: dt.toISOString(),
+        end: end.toISOString(),
+        attendees: emailAttendees.map((a) => ({ email: a.email })),
+      });
+
+      if (meet.meetLink) {
+        meetingLink = meet.meetLink;
+        this.logger.log(`Google Meet link generated: ${meetingLink}`);
+      } else {
+        this.logger.warn(`Google Meet link was not returned for ${meetingId}. Using placeholder.`);
+      }
+    } catch (err: any) {
+      this.logger.warn(
+        `Google Meet link generation failed for ${meetingId}: ${err?.message ?? err}. ` +
+          `Saving meeting with a placeholder link and sending emails anyway.`,
+      );
     }
-
-    const meetingLink = meet.meetLink;
 
     const meeting = this.meetingRepository.create({
       meetingId,
