@@ -19,7 +19,7 @@ import { OurTeamModule } from '../setting/home/our-team/our-team.module';
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET') || 'NexoviaSoft-jwt-secret-change-in-production',
         signOptions: {
-          expiresIn: '24h',
+          expiresIn: '30d',
         },
       }),
     }),
