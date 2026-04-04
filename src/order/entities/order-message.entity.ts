@@ -18,11 +18,11 @@ export class OrderMessage {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Order, { nullable: false, onDelete: 'CASCADE' })
+  @ManyToOne(() => Order, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'orderId' })
   order: Order;
 
-  @Column()
+  @Column({ nullable: true })
   orderId: number;
 
   @Column({
