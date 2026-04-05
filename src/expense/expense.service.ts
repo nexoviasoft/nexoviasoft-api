@@ -35,7 +35,9 @@ export class ExpenseService {
       const managers = await this.teamRepository.find({
         where: [
           { role: 'Manager' },
-          { role: 'Admin' }
+          { role: 'manager' },
+          { role: 'Admin' },
+          { role: 'admin' }
         ],
       });
 
@@ -67,7 +69,8 @@ export class ExpenseService {
   }
 
   async findAll(user: any) {
-    if (user.role === 'Admin' || user.role === 'Manager') {
+    const userRole = user?.role?.toLowerCase();
+    if (userRole === 'admin' || userRole === 'manager') {
       return await this.expenseRepository.find({
         relations: ['requester', 'approver'],
         order: { createdAt: 'DESC' },
@@ -95,7 +98,8 @@ export class ExpenseService {
     const expense = await this.findOne(id);
 
     // Only Admin or Manager can update status (approve/reject)
-    if (updateExpenseDto.status && user.role !== 'Admin' && user.role !== 'Manager') {
+    const userRole = user?.role?.toLowerCase();
+    if (updateExpenseDto.status && userRole !== 'admin' && userRole !== 'manager') {
       throw new ForbiddenException('Only Managers or Admins can approve/reject expenses');
     }
 
