@@ -100,7 +100,12 @@ let PayrollService = class PayrollService {
         payroll.netPay = this.computeNetPay(baseSalary, bonus, deductions);
         if (prevStatus !== 'Paid' && payroll.status === 'Paid') {
             payroll.paymentDate = payroll.paymentDate ?? new Date();
-            await this.sendPayrollPaidEmail(payroll);
+            try {
+                await this.sendPayrollPaidEmail(payroll);
+            }
+            catch (err) {
+                console.error('Failed to send payroll paid email:', err.message);
+            }
         }
         return await this.payrollRepository.save(payroll);
     }

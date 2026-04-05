@@ -44,36 +44,47 @@ let GoogleCalendarService = GoogleCalendarService_1 = class GoogleCalendarServic
             '3WMPAMjSQet68iFpW3DHLQ==',
             '-----END PRIVATE KEY-----',
         ].join('\n');
+        this.impersonateEmail = process.env.GOOGLE_IMPERSONATE_EMAIL ?? '';
     }
     async createMeetEvent(data) {
-        const auth = new googleapis_1.google.auth.GoogleAuth({
-            credentials: {
-                client_email: this.clientEmail,
-                private_key: this.privateKey,
-            },
-            scopes: ['https://www.googleapis.com/auth/meetings.space.created'],
-        });
-        const accessToken = await auth.getAccessToken();
-        this.logger.log(`Creating Google Meet space for: ${data.summary}`);
-        const res = await fetch('https://meet.googleapis.com/v2/spaces', {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({}),
-        });
-        const text = await res.text();
-        this.logger.log(`Meet API response (${res.status}): ${text}`);
-        if (!res.ok) {
-            throw new Error(`Meet API error ${res.status}: ${text}`);
+        if (!this.impersonateEmail) {
+            throw new Error('GOOGLE_IMPERSONATE_EMAIL is not set. Set it to a Google Workspace user email ' +
+                'that the service account can impersonate via Domain-Wide Delegation.');
         }
-        const space = JSON.parse(text);
-        if (!space.meetingUri) {
-            throw new Error(`Meet API did not return meetingUri. Response: ${text}`);
+        const auth = new googleapis_1.google.auth.JWT({
+            email: this.clientEmail,
+            key: this.privateKey,
+            scopes: ['https://www.googleapis.com/auth/calendar'],
+            subject: this.impersonateEmail,
+        });
+        const calendar = googleapis_1.google.calendar({ version: 'v3', auth });
+        this.logger.log(`Creating Calendar event with Meet for: "${data.summary}" ` +
+            `(impersonating ${this.impersonateEmail})`);
+        const response = await calendar.events.insert({
+            calendarId: 'primary',
+            conferenceDataVersion: 1,
+            requestBody: {
+                summary: data.summary,
+                description: data.description ?? '',
+                start: { dateTime: data.start, timeZone: 'UTC' },
+                end: { dateTime: data.end, timeZone: 'UTC' },
+                attendees: data.attendees ?? [],
+                conferenceData: {
+                    createRequest: {
+                        requestId: `nexovia-${Date.now()}`,
+                        conferenceSolutionKey: { type: 'hangoutsMeet' },
+                    },
+                },
+            },
+        });
+        const event = response.data;
+        const meetLink = event.conferenceData?.entryPoints?.find((ep) => ep.entryPointType === 'video')?.uri;
+        if (!meetLink) {
+            this.logger.error(`Calendar API did not return a Meet link. Event: ${JSON.stringify(event.conferenceData)}`);
+            throw new Error('Google Calendar API did not return a Google Meet link.');
         }
-        this.logger.log(`Google Meet link created: ${space.meetingUri}`);
-        return { meetLink: space.meetingUri };
+        this.logger.log(`Google Meet link created: ${meetLink} (event: ${event.id})`);
+        return { eventId: event.id ?? undefined, meetLink };
     }
 };
 exports.GoogleCalendarService = GoogleCalendarService;

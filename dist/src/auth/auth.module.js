@@ -31,7 +31,7 @@ exports.AuthModule = AuthModule = __decorate([
                 useFactory: (configService) => ({
                     secret: configService.get('JWT_SECRET') || 'NexoviaSoft-jwt-secret-change-in-production',
                     signOptions: {
-                        expiresIn: '24h',
+                        expiresIn: '30d',
                     },
                 }),
             }),

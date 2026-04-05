@@ -25,12 +25,12 @@ __decorate([
     __metadata("design:type", Number)
 ], OrderMessage.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => order_entity_1.Order, { nullable: false, onDelete: 'CASCADE' }),
+    (0, typeorm_1.ManyToOne)(() => order_entity_1.Order, { nullable: true, onDelete: 'CASCADE' }),
     (0, typeorm_1.JoinColumn)({ name: 'orderId' }),
     __metadata("design:type", order_entity_1.Order)
 ], OrderMessage.prototype, "order", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", Number)
 ], OrderMessage.prototype, "orderId", void 0);
 __decorate([

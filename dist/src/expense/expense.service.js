@@ -40,7 +40,9 @@ let ExpenseService = ExpenseService_1 = class ExpenseService {
             const managers = await this.teamRepository.find({
                 where: [
                     { role: 'Manager' },
-                    { role: 'Admin' }
+                    { role: 'manager' },
+                    { role: 'Admin' },
+                    { role: 'admin' }
                 ],
             });
             const managerEmails = managers.map(m => m.email).filter(e => !!e);
@@ -70,7 +72,8 @@ let ExpenseService = ExpenseService_1 = class ExpenseService {
         return savedExpense;
     }
     async findAll(user) {
-        if (user.role === 'Admin' || user.role === 'Manager') {
+        const userRole = user?.role?.toLowerCase();
+        if (userRole === 'admin' || userRole === 'manager') {
             return await this.expenseRepository.find({
                 relations: ['requester', 'approver'],
                 order: { createdAt: 'DESC' },
@@ -94,7 +97,8 @@ let ExpenseService = ExpenseService_1 = class ExpenseService {
     }
     async update(id, updateExpenseDto, user) {
         const expense = await this.findOne(id);
-        if (updateExpenseDto.status && user.role !== 'Admin' && user.role !== 'Manager') {
+        const userRole = user?.role?.toLowerCase();
+        if (updateExpenseDto.status && userRole !== 'admin' && userRole !== 'manager') {
             throw new common_1.ForbiddenException('Only Managers or Admins can approve/reject expenses');
         }
         if (updateExpenseDto.status === expense_entity_1.ExpenseStatus.APPROVED && expense.status !== expense_entity_1.ExpenseStatus.APPROVED) {

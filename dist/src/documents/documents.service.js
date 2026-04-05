@@ -135,98 +135,127 @@ let DocumentsService = DocumentsService_1 = class DocumentsService {
     }
     generateInvoiceHtml(data) {
         const items = data.items || [];
-        const total = items.reduce((sum, item) => {
-            return sum + (Number(item.quantity) * Number(item.rate));
-        }, 0);
+        const total = items.reduce((sum, item) => sum + (Number(item.quantity) * Number(item.rate)), 0);
+        const companyName = data.companyName || 'NexoviaSoft INC.';
+        const companyAddress = data.companyAddress || '123 Tech Park, San Francisco, CA\\nwww.nexoviasoft.com';
+        const note = data.note || 'Thank you for your business! Please process the payment within the agreed timeline.';
         return `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="UTF-8">
         <style>
-          body { font-family: Arial, sans-serif; padding: 40px; color: #333; }
-          .header { display: flex; justify-content: space-between; margin-bottom: 40px; }
-          .invoice-title { font-size: 36px; font-weight: bold; margin-bottom: 10px; }
+          body { font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 50px; color: #334155; background-color: #f8fafc; margin: 0; }
+          .invoice-box { max-width: 800px; margin: auto; padding: 40px; background: #ffffff; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); }
+          .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; border-bottom: 2px solid #f1f5f9; padding-bottom: 30px; }
+          .invoice-number-wrapper { color: #64748b; font-size: 14px; margin-top: 8px;}
+          .invoice-title { font-size: 42px; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -1px; }
           .company-info { text-align: right; }
-          .meta-info { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px; }
+          .company-name { font-weight: 800; font-size: 24px; color: #f58220; margin-bottom: 8px; }
+          .company-address { font-size: 14px; color: #64748b; line-height: 1.5; white-space: pre-wrap; }
+          .meta-info { display: flex; justify-content: space-between; margin-bottom: 40px; background: #f8fafc; padding: 20px; border-radius: 8px; }
+          .meta-item { display: flex; flex-direction: column; gap: 4px; }
+          .meta-label { font-size: 12px; text-transform: uppercase; font-weight: 600; color: #94a3b8; letter-spacing: 0.5px; }
+          .meta-value { font-size: 15px; font-weight: 600; color: #334155; }
           .bill-to { text-align: right; }
-          .items-table { width: 100%; border-collapse: collapse; margin: 30px 0; }
-          .items-table th { background: #EFFC76; color: #000; padding: 12px; text-align: left; }
-          .items-table td { padding: 12px; border-bottom: 1px solid #ddd; }
-          .total-section { text-align: right; margin-top: 30px; }
-          .grand-total { font-size: 24px; font-weight: bold; color: #EFFC76; }
+          .items-table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 30px 0; }
+          .items-table th { background: #f1f5f9; color: #475569; padding: 16px; text-align: left; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+          .items-table th:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+          .items-table th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+          .items-table td { padding: 16px; border-bottom: 1px solid #f1f5f9; font-size: 15px; }
+          .total-section { display: flex; justify-content: flex-end; margin-top: 30px; }
+          .total-box { width: 300px; background: #f8fafc; padding: 24px; border-radius: 8px; }
+          .total-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; color: #475569; }
+          .grand-total { display: flex; justify-content: space-between; font-size: 20px; font-weight: 800; color: #0f172a; margin-top: 16px; padding-top: 16px; border-top: 2px solid #e2e8f0; }
+          .footer { margin-top: 60px; display: flex; justify-content: space-between; align-items: flex-end; }
+          .note-section { max-width: 400px; background: #fffbeb; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 4px; }
+          .note-label { font-size: 12px; font-weight: 700; color: #d97706; text-transform: uppercase; margin-bottom: 6px; }
+          .note-content { font-size: 14px; color: #78350f; line-height: 1.5; }
+          .signature-section { text-align: center; min-width: 200px; }
+          .signature-name { font-family: 'Brush Script MT', 'Cedarville Cursive', cursive; font-size: 32px; color: #0f172a; padding-bottom: 8px; border-bottom: 2px solid #cbd5e1; margin-bottom: 12px; height: 40px; display: flex; align-items: flex-end; justify-content: center; }
+          .signature-role { font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+          .signature-title { font-size: 12px; color: #94a3b8; margin-top: 4px; }
         </style>
       </head>
       <body>
-        <div class="header">
-          <div>
-            <h1 class="invoice-title">INVOICE</h1>
-            <div>Invoice No: #${data.invoiceNumber || 'N/A'}</div>
-          </div>
-          <div class="company-info">
-            <div style="font-weight: bold; font-size: 18px; color: #EFFC76; margin-bottom: 10px;">MD SAMSUDDOHA SOJIB</div>
-            <div style="font-size: 12px; color: #666;">
-              Full Stack Developer<br/>
-              www.fiverr.com<br/>
-              Rangpur City, Bangladesh
+        <div class="invoice-box">
+          <div class="header">
+            <div>
+              <h1 class="invoice-title">INVOICE</h1>
+              <div class="invoice-number-wrapper">Invoice Number: <span style="font-weight: 600; color: #334155;">#${data.invoiceNumber || 'N/A'}</span></div>
+            </div>
+            <div class="company-info">
+              <div class="company-name">${companyName}</div>
+              <div class="company-address">${companyAddress}</div>
             </div>
           </div>
-        </div>
-        
-        <div class="meta-info">
-          <div>
-            <div>Date: ${data.date || 'N/A'}</div>
-            <div>Due Date: ${data.date || 'N/A'}</div>
+          
+          <div class="meta-info">
+            <div style="display: flex; gap: 40px;">
+              <div class="meta-item">
+                <span class="meta-label">Invoice Date</span>
+                <span class="meta-value">${data.date || new Date().toLocaleDateString()}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Due Date</span>
+                <span class="meta-value">${data.dueDate || data.date || new Date().toLocaleDateString()}</span>
+              </div>
+            </div>
+            <div class="bill-to meta-item">
+              <span class="meta-label">Billed To</span>
+              <span class="meta-value" style="font-size: 18px; color: #f58220;">${data.clientName || 'Valued Client'}</span>
+              <span style="font-size: 14px; color: #64748b; white-space: pre-wrap; margin-top: 4px;">${data.clientAddress || 'N/A'}</span>
+            </div>
           </div>
-          <div class="bill-to">
-            <div style="font-weight: bold; margin-bottom: 10px;">Bill To:</div>
-            <div style="font-weight: bold; font-size: 16px;">${data.clientName || 'N/A'}</div>
-            <div style="color: #666; white-space: pre-wrap;">${data.clientAddress || 'N/A'}</div>
-          </div>
-        </div>
-        
-        <table class="items-table">
-          <thead>
-            <tr>
-              <th>Description</th>
-              <th style="text-align: center;">Qty</th>
-              <th style="text-align: center;">Price</th>
-              <th style="text-align: center;">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${items.map((item) => `
+          
+          <table class="items-table">
+            <thead>
               <tr>
-                <td>${item.description || '—'}</td>
-                <td style="text-align: center;">${item.quantity || 0}</td>
-                <td style="text-align: center;">$${item.rate || 0}</td>
-                <td style="text-align: center; font-weight: bold;">$${(Number(item.quantity) * Number(item.rate)).toFixed(2)}</td>
+                <th>Description</th>
+                <th style="text-align: center; width: 10%;">Qty</th>
+                <th style="text-align: right; width: 20%;">Price</th>
+                <th style="text-align: right; width: 20%;">Total</th>
               </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        
-        <div class="total-section">
-          <div style="margin-bottom: 10px;">
-            <span>Subtotal: </span>
-            <span style="font-weight: bold;">$${total.toFixed(2)}</span>
-          </div>
-          <div style="margin-bottom: 10px;">
-            <span>Sales Tax (free): </span>
-            <span style="font-weight: bold;">$0.00</span>
-          </div>
-          <div class="grand-total">
-            Grand Total: $${total.toFixed(2)}
-          </div>
-        </div>
-        
-        <div style="margin-top: 50px; display: flex; justify-content: flex-end;">
-          <div style="text-align: center; border-top: 1px solid #333; min-width: 200px; padding-top: 10px;">
-            <div style="font-family: 'Brush Script MT', cursive; font-size: 24px; color: #1e293b; margin-bottom: 5px;">
-              ${data.managerName || 'Manager'}
+            </thead>
+            <tbody>
+              ${items.map((item) => `
+                <tr>
+                  <td style="font-weight: 500; color: #1e293b;">${item.description || '—'}</td>
+                  <td style="text-align: center; color: #64748b;">${item.quantity || 0}</td>
+                  <td style="text-align: right; color: #64748b;">$${item.rate || 0}</td>
+                  <td style="text-align: right; font-weight: 600; color: #0f172a;">$${(Number(item.quantity) * Number(item.rate)).toFixed(2)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          
+          <div class="total-section">
+            <div class="total-box">
+              <div class="total-row">
+                <span>Subtotal</span>
+                <span style="font-weight: 600;">$${total.toFixed(2)}</span>
+              </div>
+              <div class="total-row">
+                <span>Sales Tax (0%)</span>
+                <span style="font-weight: 600;">$0.00</span>
+              </div>
+              <div class="grand-total">
+                <span>Total Due</span>
+                <span style="color: #f58220;">$${total.toFixed(2)}</span>
+              </div>
             </div>
-            <div style="font-size: 14px; font-weight: bold; color: #666; text-transform: uppercase; letter-spacing: 1px;">
-              Authorized Signature
+          </div>
+          
+          <div class="footer">
+            <div class="note-section">
+              <div class="note-label">Note</div>
+              <div class="note-content">${note}</div>
+            </div>
+            
+            <div class="signature-section">
+              <div class="signature-name">${data.managerName || 'Manager'}</div>
+              <div class="signature-role">Manager</div>
+              <div class="signature-title">Authorized Signature</div>
             </div>
           </div>
         </div>
