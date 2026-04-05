@@ -26,10 +26,10 @@ export class Payroll {
   teamId: number;
 
   // Period this payroll belongs to (e.g. Jan 2026)
-  @Column({ type: 'int' })
+  @Column()
   periodYear: number;
 
-  @Column({ type: 'int' })
+  @Column()
   periodMonth: number; // 1-12
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
