@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Income } from './entities/income.entity';
@@ -9,6 +9,8 @@ import { OurClient } from '../setting/our-client/entities/our-client.entity';
 
 @Injectable()
 export class IncomeService {
+  private readonly logger = new Logger(IncomeService.name);
+
   constructor(
     @InjectRepository(Income)
     private readonly incomeRepository: Repository<Income>,
@@ -19,15 +21,37 @@ export class IncomeService {
     private readonly emailService: EmailService,
   ) {}
 
+  private isMissingOrdersClientIdColumnError(error: unknown): boolean {
+    const message = (error as { message?: string })?.message || '';
+    return (
+      message.includes('clientId') &&
+      message.includes('orders') &&
+      (message.includes('does not exist') || message.includes('column'))
+    );
+  }
+
   async create(createIncomeDto: CreateIncomeDto) {
     const income = this.incomeRepository.create(createIncomeDto);
     const savedIncome = await this.incomeRepository.save(income);
 
     if (createIncomeDto.orderId) {
-      const order = await this.orderRepository.findOne({
-        where: { id: createIncomeDto.orderId },
-        relations: ['client'],
-      });
+      let order: Order | null = null;
+      try {
+        order = await this.orderRepository.findOne({
+          where: { id: createIncomeDto.orderId },
+          relations: ['client'],
+        });
+      } catch (error) {
+        if (!this.isMissingOrdersClientIdColumnError(error)) {
+          throw error;
+        }
+        this.logger.warn(
+          'orders.clientId column is missing; loading order without client relation as temporary fallback.',
+        );
+        order = await this.orderRepository.findOne({
+          where: { id: createIncomeDto.orderId },
+        });
+      }
 
       if (order) {
         order.paidAmount = Number(order.paidAmount || 0) + Number(createIncomeDto.amount);
@@ -63,17 +87,44 @@ export class IncomeService {
   }
 
   async findAll() {
-    return this.incomeRepository.find({
-      relations: ['order', 'client'],
-      order: { createdAt: 'DESC' },
-    });
+    try {
+      return await this.incomeRepository.find({
+        relations: ['order', 'client'],
+        order: { createdAt: 'DESC' },
+      });
+    } catch (error) {
+      if (!this.isMissingOrdersClientIdColumnError(error)) {
+        throw error;
+      }
+      this.logger.warn(
+        'orders.clientId column is missing; returning incomes without order relation as temporary fallback.',
+      );
+      return this.incomeRepository.find({
+        relations: ['client'],
+        order: { createdAt: 'DESC' },
+      });
+    }
   }
 
   async findOne(id: number) {
-    const income = await this.incomeRepository.findOne({
-      where: { id },
-      relations: ['order', 'client'],
-    });
+    let income: Income | null = null;
+    try {
+      income = await this.incomeRepository.findOne({
+        where: { id },
+        relations: ['order', 'client'],
+      });
+    } catch (error) {
+      if (!this.isMissingOrdersClientIdColumnError(error)) {
+        throw error;
+      }
+      this.logger.warn(
+        'orders.clientId column is missing; loading income without order relation as temporary fallback.',
+      );
+      income = await this.incomeRepository.findOne({
+        where: { id },
+        relations: ['client'],
+      });
+    }
     if (!income) throw new NotFoundException(`Income with ID ${id} not found`);
     return income;
   }

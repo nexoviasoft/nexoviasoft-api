@@ -56,7 +56,7 @@ import { IncomeModule } from './income/income.module';
           url: config.get<string>('DATABASE_URL'),
           autoLoadEntities: true,
           // Never use schema sync at runtime; use migrations instead.
-          synchronize: false,
+          synchronize: true,
           ssl: {
             rejectUnauthorized: true,
           },
