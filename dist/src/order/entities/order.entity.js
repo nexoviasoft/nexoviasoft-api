@@ -28,29 +28,29 @@ __decorate([
     __metadata("design:type", Number)
 ], Order.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ unique: true }),
+    (0, typeorm_1.Column)({ name: 'orderInfo', unique: true, nullable: true }),
     __metadata("design:type", String)
 ], Order.prototype, "orderId", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => our_client_entity_1.OurClient, { nullable: false }),
-    (0, typeorm_1.JoinColumn)({ name: 'clientId' }),
+    (0, typeorm_1.ManyToOne)(() => our_client_entity_1.OurClient, { nullable: true }),
+    (0, typeorm_1.JoinColumn)({ name: 'clientInfo' }),
     __metadata("design:type", our_client_entity_1.OurClient)
 ], Order.prototype, "client", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ name: 'clientInfo', nullable: true }),
     __metadata("design:type", Number)
 ], Order.prototype, "clientId", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => category_entity_1.Category, { nullable: true }),
-    (0, typeorm_1.JoinColumn)({ name: 'categoryId' }),
+    (0, typeorm_1.JoinColumn)({ name: 'categoryInfo' }),
     __metadata("design:type", category_entity_1.Category)
 ], Order.prototype, "category", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
+    (0, typeorm_1.Column)({ name: 'categoryInfo', nullable: true }),
     __metadata("design:type", Number)
 ], Order.prototype, "categoryId", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], Order.prototype, "service", void 0);
 __decorate([

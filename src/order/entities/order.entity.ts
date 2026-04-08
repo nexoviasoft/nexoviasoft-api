@@ -23,24 +23,27 @@ export class Order {
   id: number;
 
 
-  @Column({ unique: true, nullable: true })
+  // DB column is `orderInfo`; keep property name `orderId` for API compatibility.
+  @Column({ name: 'orderInfo', unique: true, nullable: true })
   orderId: string;
 
   @ManyToOne(() => OurClient, { nullable: true })
-  @JoinColumn({ name: 'clientId' })
+  @JoinColumn({ name: 'clientInfo' })
   client: OurClient;
 
-  @Column({ nullable: true })
+  // Legacy DB column name is `clientInfo`.
+  @Column({ name: 'clientInfo', nullable: true })
   clientId: number;
 
   @ManyToOne(() => Category, { nullable: true })
-  @JoinColumn({ name: 'categoryId' })
+  @JoinColumn({ name: 'categoryInfo' })
   category: Category;
 
-  @Column({ nullable: true })
+  // Legacy DB column name is `categoryInfo`.
+  @Column({ name: 'categoryInfo', nullable: true })
   categoryId: number;
 
-  @Column()
+  @Column({ nullable: true })
   service: string; // Service name
 
   @Column('decimal', { precision: 10, scale: 2 })
