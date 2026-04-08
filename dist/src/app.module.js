@@ -55,20 +55,22 @@ exports.AppModule = AppModule = __decorate([
             typeorm_1.TypeOrmModule.forRootAsync({
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
-                useFactory: (config) => ({
-                    type: 'postgres',
-                    url: config.get('DATABASE_URL'),
-                    autoLoadEntities: true,
-                    synchronize: false,
-                    ssl: {
-                        rejectUnauthorized: true,
-                    },
-                    connectTimeoutMS: 30000,
-                    extra: {
-                        connectionTimeoutMillis: 30000,
-                        keepAlive: true,
-                    },
-                }),
+                useFactory: (config) => {
+                    return {
+                        type: 'postgres',
+                        url: config.get('DATABASE_URL'),
+                        autoLoadEntities: true,
+                        synchronize: false,
+                        ssl: {
+                            rejectUnauthorized: true,
+                        },
+                        connectTimeoutMS: 30000,
+                        extra: {
+                            connectionTimeoutMillis: 30000,
+                            keepAlive: true,
+                        },
+                    };
+                },
             }),
             hero_crasol_module_1.HeroCrasolModule,
             health_module_1.HealthModule,

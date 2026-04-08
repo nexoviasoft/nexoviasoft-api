@@ -66,15 +66,15 @@ let EmailService = EmailService_1 = class EmailService {
         this.logger = new common_1.Logger(EmailService_1.name);
         this.smtpConfig = {
             host: 'smtp.gmail.com',
-            user: 'nexoviasoft@gmail.com',
-            password: 'ofjw yqfx pllm hzpk',
-            from: 'nexoviasoft@gmail.com',
+            user: 'ashikurovi2003@gmail.com',
+            pass: 'crmk glfv cgtl rgfo',
+            from: 'ashikurovi2003@gmail.com',
         };
         this.transporter = nodemailer.createTransport({
             host: this.smtpConfig.host,
             auth: {
                 user: this.smtpConfig.user,
-                pass: this.smtpConfig.password,
+                pass: this.smtpConfig.pass,
             },
         });
         this.transporter

@@ -29,11 +29,11 @@ __decorate([
     __metadata("design:type", Number)
 ], Payroll.prototype, "teamId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'int' }),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], Payroll.prototype, "periodYear", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'int' }),
+    (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], Payroll.prototype, "periodMonth", void 0);
 __decorate([
