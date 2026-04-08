@@ -2,19 +2,20 @@ import { MigrationInterface, QueryRunner, TableColumn, TableUnique } from 'typeo
 
 export class AddOrderIdToOrders1681234567890 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Add the new column with a temporary default value
+    // 1. Add the new column as nullable without default
     await queryRunner.addColumn(
       'orders',
       new TableColumn({
         name: 'orderId',
         type: 'varchar',
-        isNullable: true, // allow null initially for existing rows
-        default: `'some_default_value'`,
+        isNullable: true,
       }),
     );
 
-    // Populate existing rows (if needed, already set by default)
-    // Ensure NOT NULL constraint
+    // 2. Populate existing rows with a default value (you can customize the logic)
+    await queryRunner.query(`UPDATE "orders" SET "orderId" = 'some_default_value' WHERE "orderId" IS NULL`);
+
+    // 3. Alter column to be NOT NULL and unique
     await queryRunner.changeColumn(
       'orders',
       'orderId',
@@ -26,7 +27,7 @@ export class AddOrderIdToOrders1681234567890 implements MigrationInterface {
       }),
     );
 
-    // Add unique constraint (if not covered by isUnique above)
+    // 4. Add unique constraint (ensures uniqueness at DB level)
     await queryRunner.createUniqueConstraint(
       'orders',
       new TableUnique({ name: 'UQ_orders_orderId', columnNames: ['orderId'] }),
