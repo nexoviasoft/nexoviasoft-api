@@ -16,6 +16,14 @@ export class OrderService {
     private readonly emailService: EmailService,
   ) { }
 
+  private isMissingClientIdColumnError(error: unknown): boolean {
+    const message = (error as { message?: string })?.message || '';
+    return (
+      message.includes('clientId') &&
+      (message.includes('does not exist') || message.includes('column'))
+    );
+  }
+
   async create(createOrderDto: CreateOrderDto) {
     // Generate orderId if not provided
     let orderId = createOrderDto.orderId;
@@ -44,10 +52,23 @@ export class OrderService {
     const savedOrder = await this.orderRepository.save(order);
 
     // Load client relation to get email
-    const orderWithClient = await this.orderRepository.findOne({
-      where: { id: savedOrder.id },
-      relations: ['client'],
-    });
+    let orderWithClient: Order | null = null;
+    try {
+      orderWithClient = await this.orderRepository.findOne({
+        where: { id: savedOrder.id },
+        relations: ['client'],
+      });
+    } catch (error) {
+      if (!this.isMissingClientIdColumnError(error)) {
+        throw error;
+      }
+      this.logger.warn(
+        'orders.clientId column is missing; skipping client relation load for order confirmation as temporary fallback.',
+      );
+    }
+    if (!orderWithClient) {
+      orderWithClient = savedOrder as Order;
+    }
 
     // Send confirmation email to client if email exists
     if (orderWithClient?.client?.email) {
@@ -143,17 +164,44 @@ export class OrderService {
   }
 
   async findAll() {
-    return this.orderRepository.find({
-      relations: ['client', 'category'],
-      order: { createdAt: 'DESC' },
-    });
+    try {
+      return await this.orderRepository.find({
+        relations: ['client', 'category'],
+        order: { createdAt: 'DESC' },
+      });
+    } catch (error) {
+      if (!this.isMissingClientIdColumnError(error)) {
+        throw error;
+      }
+      this.logger.warn(
+        'orders.clientId column is missing; returning orders without client relation as temporary fallback.',
+      );
+      return this.orderRepository.find({
+        relations: ['category'],
+        order: { createdAt: 'DESC' },
+      });
+    }
   }
 
   async findOne(id: number) {
-    const order = await this.orderRepository.findOne({
-      where: { id },
-      relations: ['client', 'category'],
-    });
+    let order: Order | null = null;
+    try {
+      order = await this.orderRepository.findOne({
+        where: { id },
+        relations: ['client', 'category'],
+      });
+    } catch (error) {
+      if (!this.isMissingClientIdColumnError(error)) {
+        throw error;
+      }
+      this.logger.warn(
+        'orders.clientId column is missing; loading single order without client relation as temporary fallback.',
+      );
+      order = await this.orderRepository.findOne({
+        where: { id },
+        relations: ['category'],
+      });
+    }
 
     if (!order) {
       throw new NotFoundException(`Order with ID ${id} not found`);
@@ -163,10 +211,24 @@ export class OrderService {
   }
 
   async findByOrderId(orderId: string) {
-    const order = await this.orderRepository.findOne({
-      where: { orderId },
-      relations: ['client', 'category'],
-    });
+    let order: Order | null = null;
+    try {
+      order = await this.orderRepository.findOne({
+        where: { orderId },
+        relations: ['client', 'category'],
+      });
+    } catch (error) {
+      if (!this.isMissingClientIdColumnError(error)) {
+        throw error;
+      }
+      this.logger.warn(
+        'orders.clientId column is missing; loading order by orderId without client relation as temporary fallback.',
+      );
+      order = await this.orderRepository.findOne({
+        where: { orderId },
+        relations: ['category'],
+      });
+    }
 
     if (!order) {
       throw new NotFoundException(`Order with orderId ${orderId} not found`);
