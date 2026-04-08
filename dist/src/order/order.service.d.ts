@@ -8,6 +8,7 @@ export declare class OrderService {
     private readonly emailService;
     private readonly logger;
     constructor(orderRepository: Repository<Order>, emailService: EmailService);
+    private isMissingClientIdColumnError;
     create(createOrderDto: CreateOrderDto): Promise<Order>;
     private generateUniqueOrderId;
     findAll(): Promise<Order[]>;
