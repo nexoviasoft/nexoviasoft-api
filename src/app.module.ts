@@ -56,7 +56,7 @@ import { IncomeModule } from './income/income.module';
         autoLoadEntities: true,
         synchronize: true, // ❌ false in production
         ssl: {
-          rejectUnauthorized: false,
+          rejectUnauthorized: true,
         },
         connectTimeoutMS: 30000, // 30 seconds
         extra: {
