@@ -23,9 +23,9 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
   private readonly smtpConfig = {
     host: 'smtp.gmail.com',
-    user: 'nexoviasoft@gmail.com',
-    password: 'ofjw yqfx pllm hzpk',
-    from: 'nexoviasoft@gmail.com',
+    user: 'ashikurovi2003@gmail.com',
+    pass: 'crmk glfv cgtl rgfo',
+    from: 'ashikurovi2003@gmail.com',
   };
 
   constructor() {
@@ -35,7 +35,7 @@ export class EmailService {
     
       auth: {
         user: this.smtpConfig.user,
-        pass: this.smtpConfig.password,
+        pass: this.smtpConfig.pass,
       },
     });
 
