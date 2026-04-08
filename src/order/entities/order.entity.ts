@@ -28,19 +28,19 @@ export class Order {
   orderId: string;
 
   @ManyToOne(() => OurClient, { nullable: true })
-  @JoinColumn({ name: 'clientInfo' })
+  @JoinColumn({ name: 'clientId' })
   client: OurClient;
 
-  // Legacy DB column name is `clientInfo`.
-  @Column({ name: 'clientInfo', nullable: true })
+  // Keep stable FK column for mixed deployments.
+  @Column({ name: 'clientId', nullable: true })
   clientId: number;
 
   @ManyToOne(() => Category, { nullable: true })
-  @JoinColumn({ name: 'categoryInfo' })
+  @JoinColumn({ name: 'categoryId' })
   category: Category;
 
-  // Legacy DB column name is `categoryInfo`.
-  @Column({ name: 'categoryInfo', nullable: true })
+  // Keep stable FK column for mixed deployments.
+  @Column({ name: 'categoryId', nullable: true })
   categoryId: number;
 
   @Column({ nullable: true })
