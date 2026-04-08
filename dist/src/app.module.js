@@ -59,9 +59,9 @@ exports.AppModule = AppModule = __decorate([
                     type: 'postgres',
                     url: config.get('DATABASE_URL'),
                     autoLoadEntities: true,
-                    synchronize: true,
+                    synchronize: false,
                     ssl: {
-                        rejectUnauthorized: false,
+                        rejectUnauthorized: true,
                     },
                     connectTimeoutMS: 30000,
                     extra: {
