@@ -1,1 +1,0 @@
-export declare function getInterviewInvitationTemplate(candidateName: string, position: string, type: string, date: string, time: string, interviewer: string, meetLink?: string, contactEmail?: string): string;

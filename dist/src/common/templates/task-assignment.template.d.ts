@@ -1,1 +1,0 @@
-export declare function getTaskAssignmentTemplate(teamMemberName: string, taskTitle: string, taskDescription: string, projectName: string, priority: string, dueDate: string | null, contactEmail: string, taskUrl?: string): string;
