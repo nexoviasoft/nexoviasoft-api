@@ -46,7 +46,7 @@ export class Order {
   @Column({ nullable: true })
   service: string; // Service name
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal', { precision: 10, scale: 2 ,nullable: true})
   amount: number;
 
   @Column({
@@ -65,7 +65,7 @@ export class Order {
   @Column({ type: 'date', nullable: true })
   date: Date;
 
-  @Column('decimal', { precision: 10, scale: 2, default: 0 })
+  @Column('decimal', { precision: 10, scale: 2, default: 0, nullable: true })
   paidAmount: number;
 
   @CreateDateColumn()
