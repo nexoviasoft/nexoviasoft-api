@@ -26,11 +26,11 @@ export class Order {
   @Column({ unique: true, nullable: true })
   orderId: string;
 
-  @ManyToOne(() => OurClient, { nullable: false })
+  @ManyToOne(() => OurClient, { nullable: true })
   @JoinColumn({ name: 'clientId' })
   client: OurClient;
 
-  @Column()
+  @Column({ nullable: true })
   clientId: number;
 
   @ManyToOne(() => Category, { nullable: true })

@@ -50,20 +50,23 @@ import { IncomeModule } from './income/income.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        url: config.get<string>('DATABASE_URL'),
-        autoLoadEntities: true,
-        synchronize: true, // ❌ false in production
-        ssl: {
-          rejectUnauthorized: false,
-        },
-        connectTimeoutMS: 30000, // 30 seconds
-        extra: {
-          connectionTimeoutMillis: 30000,
-          keepAlive: true,
-        },
-      }),
+      useFactory: (config: ConfigService) => {
+        return {
+          type: 'postgres',
+          url: config.get<string>('DATABASE_URL'),
+          autoLoadEntities: true,
+          // Never use schema sync at runtime; use migrations instead.
+          synchronize: true,
+          ssl: {
+            rejectUnauthorized: true,
+          },
+          connectTimeoutMS: 30000, // 30 seconds
+          extra: {
+            connectionTimeoutMillis: 30000,
+            keepAlive: true,
+          },
+        };
+      },
     }),
 
     // Health check module
