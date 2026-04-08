@@ -22,8 +22,9 @@ export class Order {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
-  orderId: string; // e.g., "ORD-7821"
+
+  @Column({ unique: true, nullable: true })
+  orderId: string;
 
   @ManyToOne(() => OurClient, { nullable: false })
   @JoinColumn({ name: 'clientId' })
