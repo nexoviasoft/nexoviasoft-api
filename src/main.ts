@@ -10,6 +10,19 @@ let cachedApp: NestExpressApplication;
 async function bootstrap() {
   if (!cachedApp) {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
+    const expressApp = app.getHttpAdapter().getInstance();
+
+    // Avoid 304 responses that can drop CORS headers on some clients/CDN paths.
+    expressApp.set('etag', false);
+
+    // Ensure CORS and cache headers exist on every response path.
+    app.use((req, res, next) => {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.setHeader('Cache-Control', 'no-store');
+      next();
+    });
 
     app.enableCors({
       origin: true, // ✅ সব domain allow

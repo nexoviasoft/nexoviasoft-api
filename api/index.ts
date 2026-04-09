@@ -10,6 +10,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     'Access-Control-Allow-Headers',
     'Content-Type, Authorization',
   );
+  res.setHeader('Cache-Control', 'no-store');
 
   // Preflight
   if (req.method === 'OPTIONS') {
